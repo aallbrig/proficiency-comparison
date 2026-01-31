@@ -1,6 +1,6 @@
 // Timeline functionality for cohort comparison
 
-let currentStat = 'literacy';
+let currentStat = 'attainment'; // Default to attainment which usually has data
 let markers = [];
 let statData = {};
 
@@ -59,13 +59,59 @@ function loadStatsIndex() {
         })
         .then(data => {
             if (data) {
-                loadStatData(currentStat);
+                // Try to find a stat with actual data
+                tryLoadAvailableStat();
             }
         })
         .catch(error => {
             console.error('Error loading stats index:', error);
             showNoDataWarning();
         });
+}
+
+function tryLoadAvailableStat() {
+    // Try stats in order of priority
+    const statsToTry = ['attainment', 'proficiency', 'literacy', 'graduation', 'enrollment', 'early_childhood'];
+    
+    function tryNext(index) {
+        if (index >= statsToTry.length) {
+            showNoDataWarning();
+            return;
+        }
+        
+        const stat = statsToTry[index];
+        fetch(`/data/${stat}.json`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Not found');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data && data.data && data.data.length > 0) {
+                    // Found data! Use this stat
+                    currentStat = stat;
+                    const statSelect = document.getElementById('statSelect');
+                    if (statSelect) {
+                        statSelect.value = stat;
+                    }
+                    updateStatDescription();
+                    // Store the data and hide warning
+                    statData[stat] = data;
+                    hideNoDataWarning();
+                    updateComparison();
+                } else {
+                    // No data, try next
+                    tryNext(index + 1);
+                }
+            })
+            .catch(() => {
+                // Failed to load, try next
+                tryNext(index + 1);
+            });
+    }
+    
+    tryNext(0);
 }
 
 function loadStatData(stat) {
