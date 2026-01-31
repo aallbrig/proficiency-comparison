@@ -55,6 +55,12 @@ edu-stats init
 ```
 Creates the database and applies schema.sql. Safe to run multiple times.
 
+**Sync Schema**
+```bash
+edu-stats sync
+```
+Applies schema changes from schema.sql (for migrations). Safe to run multiple times.
+
 **Check Status**
 ```bash
 edu-stats status
