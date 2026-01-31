@@ -25,6 +25,22 @@ CREATE TABLE IF NOT EXISTS source_metadata (
     error_message TEXT
 );
 
+-- Raw file storage (for Excel/CSV files we download)
+CREATE TABLE IF NOT EXISTS raw_files (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_name TEXT NOT NULL,
+    file_url TEXT NOT NULL,
+    file_path TEXT,
+    file_type TEXT NOT NULL,
+    content_hash TEXT,
+    downloaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    file_size INTEGER,
+    parsed BOOLEAN DEFAULT 0,
+    parsed_at DATETIME,
+    parse_error TEXT,
+    UNIQUE(source_name, file_url)
+);
+
 -- Literacy rates data
 CREATE TABLE IF NOT EXISTS literacy_rates (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -82,7 +98,7 @@ CREATE TABLE IF NOT EXISTS enrollment_rates (
 CREATE TABLE IF NOT EXISTS test_proficiency (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     year INTEGER NOT NULL,
-    subject TEXT NOT NULL CHECK(subject IN ('reading', 'math', 'science', 'writing')),
+    subject TEXT NOT NULL CHECK(subject IN ('reading', 'mathematics', 'science', 'writing')),
     grade INTEGER NOT NULL CHECK(grade IN (4, 8, 12)),
     avg_score REAL,
     proficiency_level TEXT,
@@ -117,3 +133,5 @@ CREATE INDEX IF NOT EXISTS idx_test_year ON test_proficiency(year);
 CREATE INDEX IF NOT EXISTS idx_early_year ON early_childhood(year);
 CREATE INDEX IF NOT EXISTS idx_pipeline_step ON pipeline_metadata(step_name, timestamp);
 CREATE INDEX IF NOT EXISTS idx_source_name ON source_metadata(source_name);
+CREATE INDEX IF NOT EXISTS idx_raw_files_source ON raw_files(source_name);
+CREATE INDEX IF NOT EXISTS idx_raw_files_parsed ON raw_files(parsed);

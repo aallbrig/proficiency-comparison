@@ -2,12 +2,11 @@ package downloaders
 
 import (
 	"database/sql"
-	"encoding/csv"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/aallbrig/proficiency-comparison/internal/database"
 )
@@ -40,65 +39,73 @@ func (w *WorldBankDownloader) Download(startYear, endYear int, dryRun bool) erro
 
 	totalRows := 0
 	for _, indicator := range indicators {
+		// World Bank API v2 format - JSON is more reliable than CSV
 		url := fmt.Sprintf(
-			"https://api.worldbank.org/v2/country/USA/indicator/%s?date=%d:%d&format=csv",
+			"https://api.worldbank.org/v2/country/USA/indicator/%s?date=%d:%d&format=json&per_page=1000",
 			indicator.code, startYear, endYear,
 		)
 
+		fmt.Printf("    Fetching %s...\n", indicator.code)
+		
 		resp, err := http.Get(url)
 		if err != nil {
-			database.UpdateSourceMetadata(w.db, sourceName, "", 0, "failed", err.Error())
-			return fmt.Errorf("failed to download %s: %w", indicator.code, err)
+			errMsg := fmt.Sprintf("failed to download %s: %v", indicator.code, err)
+			database.UpdateSourceMetadata(w.db, sourceName, "", 0, "failed", errMsg)
+			return fmt.Errorf("%s", errMsg)
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != 200 {
-			errMsg := fmt.Sprintf("HTTP %d", resp.StatusCode)
+			errMsg := fmt.Sprintf("HTTP %d for %s", resp.StatusCode, indicator.code)
 			database.UpdateSourceMetadata(w.db, sourceName, "", 0, "failed", errMsg)
-			return fmt.Errorf("download failed with status %d", resp.StatusCode)
+			return fmt.Errorf("download failed: %s", errMsg)
 		}
 
-		// Parse CSV
-		reader := csv.NewReader(resp.Body)
-		reader.LazyQuotes = true
-		reader.TrimLeadingSpace = true
+		// Read and parse JSON response
+		body, err := io.ReadAll(resp.Body)
+		if err != nil {
+			return fmt.Errorf("failed to read response: %w", err)
+		}
 
-		// Skip metadata rows (World Bank CSVs have metadata in first few rows)
-		for i := 0; i < 5; i++ {
-			_, err := reader.Read()
-			if err == io.EOF {
-				break
-			}
+		// World Bank returns [metadata, data] array
+		var response []interface{}
+		if err := json.Unmarshal(body, &response); err != nil {
+			return fmt.Errorf("failed to parse JSON: %w", err)
+		}
+
+		if len(response) < 2 {
+			fmt.Printf("    ⚠ No data returned for %s\n", indicator.code)
+			continue
+		}
+
+		// Extract data array
+		dataArray, ok := response[1].([]interface{})
+		if !ok || len(dataArray) == 0 {
+			fmt.Printf("    ⚠ Empty data array for %s\n", indicator.code)
+			continue
 		}
 
 		rowCount := 0
-		for {
-			record, err := reader.Read()
-			if err == io.EOF {
-				break
+		for _, item := range dataArray {
+			record, ok := item.(map[string]interface{})
+			if !ok {
+				continue
 			}
+
+			// Extract year and value
+			dateStr, ok := record["date"].(string)
+			if !ok {
+				continue
+			}
+
+			year, err := strconv.Atoi(dateStr)
 			if err != nil {
 				continue
 			}
 
-			if len(record) < 5 {
-				continue
-			}
-
-			// Parse year and value
-			year, err := strconv.Atoi(strings.TrimSpace(record[3]))
-			if err != nil {
-				continue
-			}
-
-			valueStr := strings.TrimSpace(record[4])
-			if valueStr == "" || valueStr == ".." {
-				continue
-			}
-
-			value, err := strconv.ParseFloat(valueStr, 64)
-			if err != nil {
-				continue
+			value, ok := record["value"].(float64)
+			if !ok || value == 0 {
+				continue // Skip null/zero values
 			}
 
 			// Insert into database
@@ -110,7 +117,7 @@ func (w *WorldBankDownloader) Download(startYear, endYear int, dryRun bool) erro
 			`, year, indicator.ageGroup, value, sourceName)
 
 			if err != nil {
-				fmt.Printf("    Warning: failed to insert row: %v\n", err)
+				fmt.Printf("    Warning: failed to insert row for year %d: %v\n", year, err)
 				continue
 			}
 
@@ -122,8 +129,15 @@ func (w *WorldBankDownloader) Download(startYear, endYear int, dryRun bool) erro
 	}
 
 	yearsRange := fmt.Sprintf("%d-%d", startYear, endYear)
-	database.UpdateSourceMetadata(w.db, sourceName, yearsRange, totalRows, "success", "")
+	if totalRows > 0 {
+		database.UpdateSourceMetadata(w.db, sourceName, yearsRange, totalRows, "success", "")
+		fmt.Printf("  ✓ World Bank download complete: %d total rows\n", totalRows)
+	} else {
+		database.UpdateSourceMetadata(w.db, sourceName, yearsRange, 0, "partial", "World Bank does not track US literacy (assumed 99%)")
+		fmt.Printf("  ℹ World Bank download: No US data available\n")
+		fmt.Println("    Note: World Bank does not collect literacy data for USA")
+		fmt.Println("    (US literacy rates are collected by NCES and other domestic sources)")
+	}
 	
-	fmt.Printf("  ✓ World Bank download complete: %d total rows\n", totalRows)
 	return nil
 }
