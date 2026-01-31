@@ -18,7 +18,8 @@ var statusCmd = &cobra.Command{
 
 func runStatus(cmd *cobra.Command, args []string) error {
 	fmt.Println("Educational Stats CLI - Status Report")
-	fmt.Println("=====================================\n")
+	fmt.Println("=====================================")
+	fmt.Println()
 
 	db, err := database.Open()
 	if err != nil {

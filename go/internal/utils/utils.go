@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -21,7 +22,7 @@ func CheckConnectivity(url string) bool {
 
 func FormatYearRange(start, end int) string {
 	if start == end {
-		return string(start)
+		return fmt.Sprintf("%d", start)
 	}
-	return string(start) + "-" + string(end)
+	return fmt.Sprintf("%d-%d", start, end)
 }
