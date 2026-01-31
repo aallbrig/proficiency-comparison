@@ -1,0 +1,81 @@
+{{ define "main" }}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            <!-- Stat Selection Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="card-title">Educational Statistics Comparison</h2>
+                    <p class="lead">Compare educational outcomes across birth year cohorts</p>
+                    
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <label for="statSelect" class="form-label">Select Statistic:</label>
+                            <select id="statSelect" class="form-select form-select-lg">
+                                <option value="literacy" selected>Literacy Rates</option>
+                                <option value="attainment">Educational Attainment</option>
+                                <option value="graduation">High School Graduation Rates</option>
+                                <option value="enrollment">Enrollment Rates</option>
+                                <option value="proficiency">Test Proficiency (NAEP)</option>
+                                <option value="early_childhood">Early Childhood Metrics</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="statDescription" class="alert alert-info mt-3 mt-md-0">
+                                <strong>Literacy Rates:</strong> Adult literacy rates (15+)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline Section -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h3 class="card-title">Interactive Timeline</h3>
+                    <p>Add birth year markers to compare cohorts. Click on the timeline to add markers, click markers to remove them.</p>
+                    
+                    <div id="timelineContainer" class="my-4">
+                        <div id="timeline"></div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="yearInput" class="form-label">Add Birth Year:</label>
+                            <div class="input-group">
+                                <input type="number" id="yearInput" class="form-control" placeholder="e.g., 1980" min="1950" max="2020">
+                                <button id="addMarkerBtn" class="btn btn-primary">Add Marker</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div id="markersList" class="mt-3 mt-md-0">
+                                <strong>Active Markers:</strong>
+                                <div id="markersDisplay" class="d-flex flex-wrap gap-2 mt-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Data Display -->
+                    <div id="comparisonResults" class="mt-4"></div>
+                </div>
+            </div>
+
+            <!-- No Data Warning -->
+            <div id="noDataWarning" class="alert alert-warning mt-4" style="display: none;">
+                <h4 class="alert-heading">No Data Available</h4>
+                <p>It looks like data hasn't been downloaded yet. To populate the database:</p>
+                <ol>
+                    <li>Install the CLI tool: <code>edu-stats-cli</code></li>
+                    <li>Run: <code>edu-stats-cli all --years=1970-2025</code></li>
+                    <li>Refresh this page</li>
+                </ol>
+                <hr>
+                <p class="mb-0">See the <a href="https://github.com/aallbrig/proficiency-comparison" class="alert-link">README</a> for installation instructions.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom Timeline JS -->
+<script src="{{ "/js/timeline.js" | relURL }}"></script>
+{{ end }}

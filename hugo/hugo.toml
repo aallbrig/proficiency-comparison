@@ -1,0 +1,13 @@
+baseURL = '/'
+languageCode = 'en-us'
+title = 'Educational Stats Comparison'
+theme = ''
+
+[params]
+  description = 'Compare educational statistics by birth year cohorts'
+  author = 'Educational Stats Team'
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true

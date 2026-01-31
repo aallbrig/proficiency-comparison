@@ -1,0 +1,121 @@
+{{ define "main" }}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <h1>{{ .Title }}</h1>
+            
+            <section class="mb-5">
+                <h2>Purpose</h2>
+                <p class="lead">
+                    The Educational Stats Comparison project provides an interactive platform for analyzing 
+                    and comparing educational outcomes across different birth year cohorts in the United States.
+                </p>
+                <p>
+                    By mapping birth years to age-appropriate educational data points, we can track how 
+                    different generations have progressed through the education system and compare their 
+                    outcomes at similar life stages.
+                </p>
+            </section>
+
+            <section class="mb-5">
+                <h2>Why This Matters</h2>
+                <p>
+                    Understanding educational trends across cohorts helps us:
+                </p>
+                <ul>
+                    <li><strong>Identify systemic changes:</strong> See how policy changes and reforms have impacted different generations</li>
+                    <li><strong>Compare outcomes fairly:</strong> Evaluate cohorts at comparable life stages rather than across different time periods</li>
+                    <li><strong>Inform future policy:</strong> Use historical data to predict and improve outcomes for current and future students</li>
+                    <li><strong>Understand inequality:</strong> Track how educational gaps have evolved over time</li>
+                </ul>
+            </section>
+
+            <section class="mb-5">
+                <h2>The Data</h2>
+                <p>
+                    We aggregate data from multiple authoritative sources:
+                </p>
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Literacy Rates</h4>
+                        <p><small>World Bank / UNESCO (1970-present)</small></p>
+                        <p>Adult and youth literacy rates measuring basic reading comprehension.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Educational Attainment</h4>
+                        <p><small>US Census Bureau (1940-present)</small></p>
+                        <p>Percentage of population with high school diplomas, bachelor's degrees, and advanced degrees.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Graduation Rates</h4>
+                        <p><small>NCES (1869-present)</small></p>
+                        <p>High school graduation and dropout rates.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Test Proficiency</h4>
+                        <p><small>NAEP (1969-present)</small></p>
+                        <p>Standardized test scores in reading, math, science, and writing.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Enrollment Rates</h4>
+                        <p><small>NCES (historical)</small></p>
+                        <p>School enrollment by level and demographic group.</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Early Childhood Metrics</h4>
+                        <p><small>NCES ECLS (1998-present)</small></p>
+                        <p>Early literacy, school readiness, and developmental indicators.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-5">
+                <h2>Methodology</h2>
+                <h4>Cohort Mapping</h4>
+                <p>
+                    Birth years are mapped to age-appropriate data:
+                </p>
+                <ul>
+                    <li>Adult literacy measured at age 15+</li>
+                    <li>High school graduation rates at age 18</li>
+                    <li>Educational attainment at age 25+</li>
+                    <li>Grade-level proficiency tests at ages 9, 13, and 17</li>
+                </ul>
+                
+                <h4>Handling Recent Cohorts</h4>
+                <p>
+                    For recent birth years (e.g., 2016), we use proxy data from current grade-level 
+                    assessments to provide estimates of ongoing educational experiences.
+                </p>
+            </section>
+
+            <section class="mb-5">
+                <h2>Technology</h2>
+                <p>
+                    This project is built with:
+                </p>
+                <ul>
+                    <li><strong>Go CLI:</strong> Data download and management tool</li>
+                    <li><strong>SQLite:</strong> Local data storage</li>
+                    <li><strong>Hugo:</strong> Static site generator</li>
+                    <li><strong>Bootstrap:</strong> Responsive UI framework</li>
+                    <li><strong>Chart.js:</strong> Data visualizations</li>
+                </ul>
+                <p>
+                    The entire project is open source under the MIT license. View the code and contribute on 
+                    <a href="https://github.com/aallbrig/proficiency-comparison">GitHub</a>.
+                </p>
+            </section>
+
+            <section class="mb-5">
+                <h2>License &amp; Attribution</h2>
+                <p>
+                    This project is licensed under the MIT License. All data is sourced from public 
+                    government databases and international organizations. Please cite the original 
+                    data sources when using this information.
+                </p>
+            </section>
+        </div>
+    </div>
+</div>
+{{ end }}

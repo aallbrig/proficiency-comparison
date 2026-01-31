@@ -1,0 +1,48 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+edu-stats-cli
+/go/edu-stats-cli
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# SQLite database
+edu_stats.db
+*.db
+
+# Hugo
+/hugo/public/
+/hugo/resources/
+/hugo/.hugo_build.lock
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Node modules (for testing)
+node_modules/
+package-lock.json
+
+# Temporary files
+tmp/
+temp/
