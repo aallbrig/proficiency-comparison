@@ -115,7 +115,7 @@ function showError(message) {
                 <h4 class="alert-heading">Data Not Available</h4>
                 <p>${message}</p>
                 <hr>
-                <p class="mb-0">Run: <code>edu-stats-cli all --years=1970-2025</code></p>
+                <p class="mb-0">Run: <code>edu-stats all --years=1970-2025</code></p>
             </div>
         `;
     }

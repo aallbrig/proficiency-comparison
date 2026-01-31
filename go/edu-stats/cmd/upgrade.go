@@ -107,7 +107,7 @@ func runUpgrade(cmd *cobra.Command, args []string) error {
 	}
 
 	fmt.Println("✅ Successfully upgraded to version", latestVersion)
-	fmt.Println("Run 'edu-stats-cli version' to verify.")
+	fmt.Println("Run 'edu-stats version' to verify.")
 
 	return nil
 }

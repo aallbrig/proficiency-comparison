@@ -27,21 +27,21 @@ Visit the [Releases](https://github.com/aallbrig/proficiency-comparison/releases
 
 ```bash
 # Linux/macOS
-wget https://github.com/aallbrig/proficiency-comparison/releases/latest/download/edu-stats-cli-linux-amd64
-chmod +x edu-stats-cli-linux-amd64
-sudo mv edu-stats-cli-linux-amd64 /usr/local/bin/edu-stats-cli
+wget https://github.com/aallbrig/proficiency-comparison/releases/latest/download/edu-stats-linux-amd64
+chmod +x edu-stats-linux-amd64
+sudo mv edu-stats-linux-amd64 /usr/local/bin/edu-stats
 
 # Or for macOS ARM
-wget https://github.com/aallbrig/proficiency-comparison/releases/latest/download/edu-stats-cli-darwin-arm64
-chmod +x edu-stats-cli-darwin-arm64
-sudo mv edu-stats-cli-darwin-arm64 /usr/local/bin/edu-stats-cli
+wget https://github.com/aallbrig/proficiency-comparison/releases/latest/download/edu-stats-darwin-arm64
+chmod +x edu-stats-darwin-arm64
+sudo mv edu-stats-darwin-arm64 /usr/local/bin/edu-stats
 ```
 
 #### Option 2: Install from Source
 
 ```bash
 git clone https://github.com/aallbrig/proficiency-comparison.git
-cd proficiency-comparison/go
+cd proficiency-comparison/go/edu-stats
 go install
 ```
 
@@ -51,60 +51,60 @@ go install
 
 **Initialize Database**
 ```bash
-edu-stats-cli init
+edu-stats init
 ```
 Creates the database and applies schema.sql. Safe to run multiple times.
 
 **Check Status**
 ```bash
-edu-stats-cli status
+edu-stats status
 ```
 Shows database status, last download times, row counts, and data source connectivity.
 
 **Download All Data**
 ```bash
-edu-stats-cli all --years=1970-2025
+edu-stats all --years=1970-2025
 ```
 Runs the complete pipeline: schema setup, data downloads, processing, and Hugo asset generation.
 
 **Dry Run**
 ```bash
-edu-stats-cli all --years=1970-2025 --dry-run
+edu-stats all --years=1970-2025 --dry-run
 ```
 Simulates the download without fetching data, showing estimates.
 
 **Check Version and Updates**
 ```bash
-edu-stats-cli version
-edu-stats-cli upgrade
+edu-stats version
+edu-stats upgrade
 ```
 
 **Individual Pipeline Steps**
 ```bash
-edu-stats-cli init                    # Initialize database schema
-edu-stats-cli all check-schema
-edu-stats-cli all download-worldbank
-edu-stats-cli all download-census
-edu-stats-cli all download-nces
-edu-stats-cli all download-naep
-edu-stats-cli all download-ecls
+edu-stats init                    # Initialize database schema
+edu-stats all check-schema
+edu-stats all download-worldbank
+edu-stats all download-census
+edu-stats all download-nces
+edu-stats all download-naep
+edu-stats all download-ecls
 ```
 
 #### Website
 
 **Run Locally**
 ```bash
-cd hugo
+cd hugo/site
 hugo server -D
 ```
 Visit http://localhost:1313
 
 **Build for Production**
 ```bash
-cd hugo
+cd hugo/site
 hugo
 ```
-Output in `hugo/public/`
+Output in `hugo/site/public/`
 
 ## Data Sources
 
@@ -121,21 +121,26 @@ The project integrates data from:
 ```
 proficiency-comparison/
 ├── go/                      # Go CLI source code
-│   ├── cmd/                 # Command implementations
-│   ├── internal/            # Internal packages
-│   │   ├── database/        # SQLite operations
-│   │   ├── downloaders/     # Data source downloaders
-│   │   ├── generators/      # Hugo asset generators
-│   │   └── utils/           # Utilities
-│   ├── go.mod
-│   └── main.go
+│   └── edu-stats/          # CLI application
+│       ├── cmd/            # Command implementations
+│       ├── internal/       # Internal packages
+│       │   ├── database/   # SQLite operations
+│       │   ├── downloaders/ # Data source downloaders
+│       │   ├── generators/ # Hugo asset generators
+│       │   └── utils/      # Utilities
+│       ├── data/           # Database storage (gitignored)
+│       ├── go.mod
+│       ├── main.go
+│       └── .gitignore
 ├── hugo/                    # Hugo website source
-│   ├── content/             # Content and data files
-│   ├── layouts/             # HTML templates
-│   ├── static/              # CSS, JS, images
-│   └── config.toml
-├── schema.sql               # Database schema
-├── .github/workflows/       # CI/CD pipelines
+│   └── site/               # Website root
+│       ├── content/        # Content and data files
+│       ├── layouts/        # HTML templates
+│       ├── static/         # CSS, JS, images
+│       ├── config.toml
+│       └── .gitignore
+├── schema.sql              # Database schema
+├── .github/workflows/      # CI/CD pipelines
 └── README.md
 ```
 
@@ -145,13 +150,13 @@ proficiency-comparison/
 
 **Go Tests**
 ```bash
-cd go
+cd go/edu-stats
 go test ./... -v
 ```
 
 **JavaScript Tests**
 ```bash
-cd hugo
+cd hugo/site
 npm install
 npm test
 ```
@@ -168,12 +173,12 @@ npm test
 
 ### CLI Pipeline
 
-1. **Schema Check**: Validates/creates SQLite database with schema.sql
-   - Can be run standalone with `edu-stats-cli init`
+1. **Schema Check**: Validates/creates SQLite database with schema.sql in `go/edu-stats/data/`
+   - Can be run standalone with `edu-stats init`
 2. **Download**: Fetches data from each source (parallel where safe)
 3. **Parse**: Processes CSV/JSON/Excel files
 4. **Store**: Inserts into SQLite (idempotent, skips duplicates)
-5. **Generate**: Creates JSON assets for Hugo in `/hugo/content/data/`
+5. **Generate**: Creates JSON assets for Hugo in `/hugo/site/static/data/`
 
 ### Website Features
 

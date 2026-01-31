@@ -10,7 +10,7 @@ import (
 const Version = "1.0.0"
 
 var rootCmd = &cobra.Command{
-	Use:   "edu-stats-cli",
+	Use:   "edu-stats",
 	Short: "Educational Statistics CLI Tool",
 	Long: `A command-line tool for downloading and managing US educational statistics.
 	

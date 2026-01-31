@@ -10,7 +10,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const DatabaseFile = "edu_stats.db"
+const DatabaseFile = "data/edu_stats.db"
 
 func Open() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", DatabaseFile)
@@ -33,8 +33,8 @@ func ApplySchema(db *sql.DB) error {
 	// Try multiple locations
 	locations := []string{
 		schemaPath,
-		filepath.Join("..", schemaPath),
 		filepath.Join("..", "..", schemaPath),
+		filepath.Join("..", "..", "..", schemaPath),
 	}
 	
 	var schemaBytes []byte

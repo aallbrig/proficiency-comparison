@@ -147,8 +147,8 @@ func runAll(cmd *cobra.Command, args []string) error {
 
 	fmt.Printf("\n✅ Pipeline completed successfully!\n")
 	fmt.Printf("\nNext steps:\n")
-	fmt.Printf("  1. View data: edu-stats-cli status\n")
-	fmt.Printf("  2. Run website: cd hugo && hugo server\n")
+	fmt.Printf("  1. View data: edu-stats status\n")
+	fmt.Printf("  2. Run website: cd hugo/site && hugo server\n")
 	
 	return nil
 }
