@@ -49,6 +49,12 @@ go install
 
 #### CLI Commands
 
+**Initialize Database**
+```bash
+edu-stats-cli init
+```
+Creates the database and applies schema.sql. Safe to run multiple times.
+
 **Check Status**
 ```bash
 edu-stats-cli status
@@ -75,6 +81,7 @@ edu-stats-cli upgrade
 
 **Individual Pipeline Steps**
 ```bash
+edu-stats-cli init                    # Initialize database schema
 edu-stats-cli all check-schema
 edu-stats-cli all download-worldbank
 edu-stats-cli all download-census
@@ -162,6 +169,7 @@ npm test
 ### CLI Pipeline
 
 1. **Schema Check**: Validates/creates SQLite database with schema.sql
+   - Can be run standalone with `edu-stats-cli init`
 2. **Download**: Fetches data from each source (parallel where safe)
 3. **Parse**: Processes CSV/JSON/Excel files
 4. **Store**: Inserts into SQLite (idempotent, skips duplicates)
