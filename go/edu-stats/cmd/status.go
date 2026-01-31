@@ -45,7 +45,7 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		fmt.Printf("  ❌ Error reading source metadata: %v\n", err)
 	} else if len(sources) == 0 {
-		fmt.Println("  ⚠ No data downloaded yet. Run 'edu-stats-cli all' to download data.")
+		fmt.Println("  ⚠ No data downloaded yet. Run 'edu-stats all' to download data.")
 	} else {
 		for _, source := range sources {
 			status := "✓"
