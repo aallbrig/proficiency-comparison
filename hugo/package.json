@@ -1,0 +1,19 @@
+{
+  "name": "edu-stats-hugo",
+  "version": "1.0.0",
+  "description": "Educational Stats Comparison Website",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "dev": "hugo server -D",
+    "build": "hugo --gc --minify"
+  },
+  "keywords": ["education", "statistics", "data-visualization"],
+  "author": "Educational Stats Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@jest/globals": "^29.7.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}
