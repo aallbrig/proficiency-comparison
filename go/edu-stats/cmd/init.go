@@ -76,8 +76,8 @@ func runInit(cmd *cobra.Command, args []string) error {
 	fmt.Println("✅ Database initialization complete!")
 	fmt.Println()
 	fmt.Println("Next steps:")
-	fmt.Println("  1. Check status: edu-stats-cli status")
-	fmt.Println("  2. Download data: edu-stats-cli all --years=1970-2025")
+	fmt.Println("  1. Check status: edu-stats status")
+	fmt.Println("  2. Download data: edu-stats all --years=1970-2025")
 	
 	return nil
 }

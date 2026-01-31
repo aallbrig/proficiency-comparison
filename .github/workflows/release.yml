@@ -23,24 +23,24 @@ jobs:
         go-version: '1.21'
         
     - name: Build binaries
-      working-directory: ./go
+      working-directory: ./go/edu-stats
       run: |
-        mkdir -p ../dist
+        mkdir -p ../../dist
         
         # Linux amd64
-        GOOS=linux GOARCH=amd64 go build -o ../dist/edu-stats-cli-linux-amd64 -ldflags="-s -w" .
+        GOOS=linux GOARCH=amd64 go build -o ../../dist/edu-stats-linux-amd64 -ldflags="-s -w" .
         
         # Linux arm64
-        GOOS=linux GOARCH=arm64 go build -o ../dist/edu-stats-cli-linux-arm64 -ldflags="-s -w" .
+        GOOS=linux GOARCH=arm64 go build -o ../../dist/edu-stats-linux-arm64 -ldflags="-s -w" .
         
         # macOS amd64
-        GOOS=darwin GOARCH=amd64 go build -o ../dist/edu-stats-cli-darwin-amd64 -ldflags="-s -w" .
+        GOOS=darwin GOARCH=amd64 go build -o ../../dist/edu-stats-darwin-amd64 -ldflags="-s -w" .
         
         # macOS arm64
-        GOOS=darwin GOARCH=arm64 go build -o ../dist/edu-stats-cli-darwin-arm64 -ldflags="-s -w" .
+        GOOS=darwin GOARCH=arm64 go build -o ../../dist/edu-stats-darwin-arm64 -ldflags="-s -w" .
         
         # Windows amd64
-        GOOS=windows GOARCH=amd64 go build -o ../dist/edu-stats-cli-windows-amd64.exe -ldflags="-s -w" .
+        GOOS=windows GOARCH=amd64 go build -o ../../dist/edu-stats-windows-amd64.exe -ldflags="-s -w" .
         
     - name: Create Release
       uses: softprops/action-gh-release@v1

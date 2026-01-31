@@ -33,13 +33,9 @@ func (h *HugoGenerator) GenerateAll() error {
 	fmt.Println("  Generating Hugo JSON assets...")
 
 	// Create output directory
-	outputDir := filepath.Join("hugo", "static", "data")
+	outputDir := filepath.Join("..", "..", "hugo", "site", "static", "data")
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		// Try alternative path
-		outputDir = filepath.Join("..", "hugo", "static", "data")
-		if err := os.MkdirAll(outputDir, 0755); err != nil {
-			return fmt.Errorf("failed to create output directory: %w", err)
-		}
+		return fmt.Errorf("failed to create output directory: %w", err)
 	}
 
 	generators := []struct {

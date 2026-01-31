@@ -13,7 +13,7 @@ var versionCmd = &cobra.Command{
 }
 
 func runVersion(cmd *cobra.Command, args []string) {
-	fmt.Printf("edu-stats-cli version %s\n", Version)
+	fmt.Printf("edu-stats version %s\n", Version)
 	fmt.Println("Educational Statistics CLI Tool")
 	fmt.Println("https://github.com/aallbrig/proficiency-comparison")
 }

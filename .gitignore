@@ -4,8 +4,6 @@
 *.dll
 *.so
 *.dylib
-edu-stats-cli
-/go/edu-stats-cli
 
 # Test binary, built with `go test -c`
 *.test
@@ -13,17 +11,8 @@ edu-stats-cli
 # Output of the go coverage tool
 *.out
 
-# Dependency directories
-vendor/
-
-# SQLite database
-edu_stats.db
+# SQLite database (now in go/edu-stats/data/)
 *.db
-
-# Hugo
-/hugo/public/
-/hugo/resources/
-/hugo/.hugo_build.lock
 
 # IDEs
 .vscode/
@@ -38,10 +27,6 @@ Thumbs.db
 
 # Logs
 *.log
-
-# Node modules (for testing)
-node_modules/
-package-lock.json
 
 # Temporary files
 tmp/
