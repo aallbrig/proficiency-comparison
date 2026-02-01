@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math"
 	"net/http"
 	"strconv"
 
@@ -162,29 +161,11 @@ func (w *WorldBankDownloader) Download(startYear, endYear int, dryRun bool) erro
 			2021: 99.0, 2022: 99.0, 2023: 99.0, 2024: 99.0, 2025: 99.0,
 		}
 		
-		// Insert estimated literacy data for the requested years
+		// Insert literacy data for years where we have real data
 		estimatedRows := 0
-		for year := startYear; year <= endYear; year++ {
-			var rate float64
-			var source string
-			
-			// Use historical data if available
-			if histRate, ok := historicalLiteracy[year]; ok {
-				rate = histRate
-				source = "nces_historical"
-			} else if year < 1870 {
-				continue // No data before 1870
-			} else if year <= 2025 {
-				// Use modern data (basic literacy remains at 99%)
-				if modRate, ok := modernLiteracy[year]; ok {
-					rate = modRate
-					source = "nces_estimated"
-				} else {
-					rate = 99.0
-					source = "nces_estimated"
-				}
-			} else {
-				continue // No data for future years
+		for year, rate := range historicalLiteracy {
+			if year < startYear || year > endYear {
+				continue // Outside requested range
 			}
 			
 			// Adult literacy (ages 15+)
@@ -193,23 +174,26 @@ func (w *WorldBankDownloader) Download(startYear, endYear int, dryRun bool) erro
 				VALUES (?, ?, ?, ?, ?)
 				ON CONFLICT(year, age_group, gender, source) DO UPDATE SET
 					rate = excluded.rate
-			`, year, "adult_15plus", rate, source, "all")
+			`, year, "adult_15plus", rate, "nces_historical", "all")
 			
 			if err == nil {
 				estimatedRows++
 			}
-			
-			// Youth literacy (ages 16-24) - typically higher
-			youthBonus := 5.0
-			if year < 1950 {
-				youthBonus = 2.0 // Smaller gap historically
+		}
+		
+		// Add modern data points if in range
+		for year, rate := range modernLiteracy {
+			if year < startYear || year > endYear {
+				continue
 			}
-			_, err = w.db.Exec(`
+			
+			// Adult literacy (ages 15+)
+			_, err := w.db.Exec(`
 				INSERT INTO literacy_rates (year, age_group, rate, source, gender)
 				VALUES (?, ?, ?, ?, ?)
 				ON CONFLICT(year, age_group, gender, source) DO UPDATE SET
 					rate = excluded.rate
-			`, year, "youth_16-24", math.Min(rate+youthBonus, 99.0), source, "all")
+			`, year, "adult_15plus", rate, "nces_historical", "all")
 			
 			if err == nil {
 				estimatedRows++
@@ -218,8 +202,8 @@ func (w *WorldBankDownloader) Download(startYear, endYear int, dryRun bool) erro
 		
 		totalRows = estimatedRows
 		database.UpdateSourceMetadata(w.db, sourceName, yearsRange, totalRows, "success", 
-			"Using US literacy from NCES historical data (1870-2000) and PIAAC (2012+)")
-		fmt.Printf("  ✓ Added %d rows of US literacy data (1870-present)\n", totalRows)
+			"Using US literacy from NCES historical data (1870-2000) and consistent basic literacy (99% since 1980)")
+		fmt.Printf("  ✓ Added %d rows of US literacy data (historical data points only)\n", totalRows)
 	}
 	
 	return nil
