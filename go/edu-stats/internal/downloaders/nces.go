@@ -31,7 +31,7 @@ func (n *NCESDownloader) Download(startYear, endYear int, dryRun bool) error {
 
 	fmt.Println("  Downloading NCES graduation and enrollment data...")
 	
-	// NCES Digest tables we want to download
+	// NCES Digest tables - updated for d23 (2023 edition)
 	tables := []struct {
 		name     string
 		url      string
@@ -40,19 +40,20 @@ func (n *NCESDownloader) Download(startYear, endYear int, dryRun bool) error {
 	}{
 		{
 			name:     "Graduation rates (Table 219.46)",
-			url:      "https://nces.ed.gov/programs/digest/d22/tables/xls/tabn219.46.xls",
+			url:      "https://nces.ed.gov/programs/digest/d23/tables/xls/tabn219.46.xls",
 			sheetIdx: 0,
 			dataType: "graduation",
 		},
 		{
 			name:     "Enrollment rates (Table 103.20)",
-			url:      "https://nces.ed.gov/programs/digest/d22/tables/xls/tabn103.20.xls",
+			url:      "https://nces.ed.gov/programs/digest/d23/tables/xls/tabn103.20.xls",
 			sheetIdx: 0,
 			dataType: "enrollment",
 		},
 	}
 	
 	totalRows := 0
+	parseErrors := []string{}
 	
 	for _, table := range tables {
 		fmt.Printf("    Downloading %s...\n", table.name)
@@ -61,14 +62,27 @@ func (n *NCESDownloader) Download(startYear, endYear int, dryRun bool) error {
 		filePath, err := n.downloadFile(table.url, sourceName)
 		if err != nil {
 			fmt.Printf("    ⚠ Failed to download %s: %v\n", table.name, err)
+			parseErrors = append(parseErrors, fmt.Sprintf("%s: download failed", table.name))
 			continue
 		}
+		
+		fmt.Printf("    ✓ Downloaded to: %s\n", filePath)
 		
 		// Parse Excel file
 		rows, err := n.parseExcelFile(filePath, table.sheetIdx, table.dataType, startYear, endYear)
 		if err != nil {
-			fmt.Printf("    ⚠ Failed to parse %s: %v\n", table.name, err)
-			// Mark as parse error but don't fail
+			errMsg := err.Error()
+			if strings.Contains(errMsg, "unsupported") || strings.Contains(errMsg, "format") {
+				fmt.Printf("    ⚠ Cannot parse old Excel format (.xls)\n")
+				fmt.Printf("      File downloaded to: %s\n", filePath)
+				fmt.Printf("      Please convert to .xlsx format or extract data manually\n")
+				parseErrors = append(parseErrors, fmt.Sprintf("%s: old Excel format", table.name))
+			} else {
+				fmt.Printf("    ⚠ Failed to parse %s: %v\n", table.name, err)
+				parseErrors = append(parseErrors, fmt.Sprintf("%s: %v", table.name, err))
+			}
+			
+			// Mark as parse error
 			if fileID, _ := n.getFileID(sourceName, table.url); fileID > 0 {
 				database.MarkFileParseError(n.db, fileID, err.Error())
 			}
@@ -88,12 +102,25 @@ func (n *NCESDownloader) Download(startYear, endYear int, dryRun bool) error {
 	if totalRows > 0 {
 		database.UpdateSourceMetadata(n.db, sourceName, yearsRange, totalRows, "success", "")
 	} else {
-		database.UpdateSourceMetadata(n.db, sourceName, yearsRange, 0, "partial", 
-			"Unable to parse Excel files")
+		errorMsg := "Unable to parse Excel files (old .xls format not fully supported). Files downloaded for manual extraction."
+		if len(parseErrors) > 0 {
+			errorMsg = strings.Join(parseErrors, "; ")
+		}
+		database.UpdateSourceMetadata(n.db, sourceName, yearsRange, 0, "partial", errorMsg)
+		
+		fmt.Println()
+		fmt.Println("    ℹ NCES Note: Files are in old Excel 97-2003 (.xls) format")
+		fmt.Println("    ℹ Automatic parsing not fully supported for this format")
+		fmt.Println("    ℹ Files have been downloaded to:", filepath.Dir(n.getDownloadPath("")))
+		fmt.Println("    ℹ You can manually extract data or convert files to .xlsx format")
 	}
 	
 	fmt.Printf("  ✓ NCES download complete: %d rows\n", totalRows)
 	return nil
+}
+
+func (n *NCESDownloader) getDownloadPath(filename string) string {
+	return filepath.Join(database.GetDataDir(), "downloads", filename)
 }
 
 func (n *NCESDownloader) downloadFile(url, sourceName string) (string, error) {
