@@ -4,63 +4,206 @@
         <div class="col-lg-10 mx-auto">
             <h1>{{ .Title }}</h1>
             
-            <p class="lead">Explore educational statistics across time periods with interactive charts.</p>
+            <p class="lead">Explore 150+ years of US educational statistics with interactive charts. Data spans from 1870 to 2025 across six key metrics.</p>
 
-            <!-- Stat Selection -->
-            <div class="mb-4">
-                <label for="dataStatSelect" class="form-label">Select Statistic:</label>
-                <select id="dataStatSelect" class="form-select">
-                    <option value="literacy" selected>Literacy Rates</option>
-                    <option value="attainment">Educational Attainment</option>
-                    <option value="graduation">High School Graduation Rates</option>
-                    <option value="enrollment">Enrollment Rates</option>
-                    <option value="proficiency">Test Proficiency (NAEP)</option>
-                    <option value="early_childhood">Early Childhood Metrics</option>
-                </select>
-            </div>
-
-            <!-- Chart Container -->
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <canvas id="dataChart"></canvas>
+            <!-- Literacy Rates Section -->
+            <div class="card shadow-sm mt-5" id="literacy">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-book"></i> Literacy Rates (1870-2025)
+                    </h2>
                 </div>
-            </div>
-
-            <!-- Data Table -->
-            <div class="card shadow-sm mt-4">
                 <div class="card-body">
-                    <h3>Data Table</h3>
-                    <div class="table-responsive">
-                        <table id="dataTable" class="table table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Year</th>
-                                    <th>Value</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
+                    <p><strong>Description:</strong> Adult literacy rates (15+) showing the progression from 80% (1870) to near-universal literacy (99%) by 1980.</p>
+                    <p><strong>Source:</strong> NCES "120 Years of American Education" historical data</p>
+                    <canvas id="literacy-chart" height="80"></canvas>
+                    
+                    <!-- Collapsible Raw Data -->
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#literacy-data">
+                            <i class="bi bi-table"></i> Show Raw Data
+                        </button>
+                        <div class="collapse mt-2" id="literacy-data">
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-sm table-striped" id="literacy-table">
+                                    <thead class="sticky-top bg-light">
+                                        <tr><th>Year</th><th>Literacy Rate (%)</th></tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Data Source Info -->
-            <div class="card shadow-sm mt-4">
-                <div class="card-body">
-                    <h3>Data Sources</h3>
-                    <ul>
-                        <li><strong>Literacy Rates:</strong> World Bank DataBank / UNESCO Institute for Statistics</li>
-                        <li><strong>Educational Attainment:</strong> US Census Bureau (CPS/ASEC)</li>
-                        <li><strong>High School Graduation:</strong> National Center for Education Statistics (NCES)</li>
-                        <li><strong>Enrollment Rates:</strong> NCES Digest of Education Statistics</li>
-                        <li><strong>Test Proficiency:</strong> National Assessment of Educational Progress (NAEP)</li>
-                        <li><strong>Early Childhood Metrics:</strong> NCES Early Childhood Longitudinal Study (ECLS)</li>
-                    </ul>
+            <!-- Educational Attainment Section -->
+            <div class="card shadow-sm mt-4" id="attainment">
+                <div class="card-header bg-success text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-mortarboard"></i> Educational Attainment (1940-2023)
+                    </h2>
                 </div>
+                <div class="card-body">
+                    <p><strong>Description:</strong> Percentage of adults (25+) with bachelor's degree or higher. Shows dramatic expansion from 4.6% (1940) to 33%+ (2023).</p>
+                    <p><strong>Source:</strong> US Census Bureau historical tables and American Community Survey API</p>
+                    <canvas id="attainment-chart" height="80"></canvas>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#attainment-data">
+                            <i class="bi bi-table"></i> Show Raw Data
+                        </button>
+                        <div class="collapse mt-2" id="attainment-data">
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-sm table-striped" id="attainment-table">
+                                    <thead class="sticky-top bg-light">
+                                        <tr><th>Year</th><th>Bachelor's+ (%)</th></tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graduation Rates Section -->
+            <div class="card shadow-sm mt-4" id="graduation">
+                <div class="card-header bg-info text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-award"></i> High School Graduation Rates (1870-2022)
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <p><strong>Description:</strong> Four-year cohort graduation rates showing growth from 2% (1870) to 87% (2022). Reflects the transformation of high school from elite to near-universal.</p>
+                    <p><strong>Source:</strong> NCES Digest of Education Statistics, Table 219.46</p>
+                    <canvas id="graduation-chart" height="80"></canvas>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#graduation-data">
+                            <i class="bi bi-table"></i> Show Raw Data
+                        </button>
+                        <div class="collapse mt-2" id="graduation-data">
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-sm table-striped" id="graduation-table">
+                                    <thead class="sticky-top bg-light">
+                                        <tr><th>Year</th><th>Graduation Rate (%)</th></tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrollment Rates Section -->
+            <div class="card shadow-sm mt-4" id="enrollment">
+                <div class="card-header bg-warning text-dark">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-people"></i> Enrollment Rates (1870-2022)
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <p><strong>Description:</strong> K-12 enrollment rates (ages 5-17) from 50% (1870) to 94.5% (2022). Shows impact of compulsory education laws and COVID-19.</p>
+                    <p><strong>Source:</strong> NCES Digest of Education Statistics, Table 103.20</p>
+                    <canvas id="enrollment-chart" height="80"></canvas>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#enrollment-data">
+                            <i class="bi bi-table"></i> Show Raw Data
+                        </button>
+                        <div class="collapse mt-2" id="enrollment-data">
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-sm table-striped" id="enrollment-table">
+                                    <thead class="sticky-top bg-light">
+                                        <tr><th>Year</th><th>Enrollment Rate (%)</th></tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Proficiency Section -->
+            <div class="card shadow-sm mt-4" id="proficiency">
+                <div class="card-header bg-danger text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-clipboard-data"></i> Test Proficiency - NAEP (1971-2022)
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <p><strong>Description:</strong> National Assessment of Educational Progress long-term trend scores for reading and math at grades 4 and 8. Scale: 0-500.</p>
+                    <p><strong>Source:</strong> NAEP Long-Term Trend Assessments</p>
+                    <canvas id="proficiency-chart" height="80"></canvas>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#proficiency-data">
+                            <i class="bi bi-table"></i> Show Raw Data
+                        </button>
+                        <div class="collapse mt-2" id="proficiency-data">
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-sm table-striped" id="proficiency-table">
+                                    <thead class="sticky-top bg-light">
+                                        <tr><th>Year</th><th>Average Score</th></tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Early Childhood Section -->
+            <div class="card shadow-sm mt-4 mb-5" id="early_childhood">
+                <div class="card-header bg-secondary text-white">
+                    <h2 class="h4 mb-0">
+                        <i class="bi bi-stars"></i> Early Childhood Readiness (1998-2022)
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <p><strong>Description:</strong> Kindergarten entry reading and math scores from ECLS cohort studies. Scale: 0-100. Shows COVID-19 impact on early learning.</p>
+                    <p><strong>Source:</strong> NCES Early Childhood Longitudinal Study (ECLS-K)</p>
+                    <canvas id="early_childhood-chart" height="80"></canvas>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#early_childhood-data">
+                            <i class="bi bi-table"></i> Show Raw Data
+                        </button>
+                        <div class="collapse mt-2" id="early_childhood-data">
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-sm table-striped" id="early_childhood-table">
+                                    <thead class="sticky-top bg-light">
+                                        <tr><th>Year</th><th>Average Score</th></tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Notes -->
+            <div class="alert alert-info">
+                <h4><i class="bi bi-info-circle"></i> Data Notes</h4>
+                <ul class="mb-0">
+                    <li><strong>Literacy:</strong> Consistent basic literacy measure (ability to read/write at any level). Near-universal since 1980.</li>
+                    <li><strong>Attainment:</strong> Shows dramatic democratization of higher education from 4.6% (1940) to 33%+ (2023).</li>
+                    <li><strong>Graduation & Enrollment:</strong> Historical perspective shows compulsory education's impact over 150+ years.</li>
+                    <li><strong>NAEP:</strong> Only available from 1971+. Stable long-term trend scores allow cross-decade comparisons.</li>
+                    <li><strong>Early Childhood:</strong> ECLS cohorts began 1998. Recent scores show COVID-19 learning disruption.</li>
+                </ul>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
 <script src="{{ "/js/data-charts.js" | relURL }}"></script>
 {{ end }}

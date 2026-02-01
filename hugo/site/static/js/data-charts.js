@@ -1,53 +1,155 @@
-// Data visualization charts
+// Data visualization charts - Multi-section layout
 
-let chart = null;
-let currentDataStat = 'literacy';
+const charts = {};
+const datasets = ['literacy', 'attainment', 'graduation', 'enrollment', 'proficiency', 'early_childhood'];
 
 document.addEventListener('DOMContentLoaded', function() {
-    setupDataChart();
-    loadDataForChart(currentDataStat);
-    
-    const select = document.getElementById('dataStatSelect');
-    if (select) {
-        select.addEventListener('change', function() {
-            currentDataStat = this.value;
-            loadDataForChart(currentDataStat);
-        });
-    }
+    // Load all datasets and render charts
+    datasets.forEach(stat => {
+        loadAndRenderChart(stat);
+    });
 });
 
-function setupDataChart() {
-    const ctx = document.getElementById('dataChart');
+async function loadAndRenderChart(statName) {
+    try {
+        const response = await fetch(`/data/${statName}.json`);
+        if (!response.ok) {
+            console.warn(`Could not load ${statName}.json`);
+            return;
+        }
+        
+        const statData = await response.json();
+        const chartId = `${statName}-chart`;
+        const tableId = `${statName}-table`;
+        
+        // Render chart
+        renderChart(chartId, statData, statName);
+        
+        // Populate table
+        populateTable(tableId, statData);
+        
+    } catch (error) {
+        console.error(`Error loading ${statName}:`, error);
+    }
+}
+
+function renderChart(canvasId, statData, statName) {
+    const ctx = document.getElementById(canvasId);
     if (!ctx) return;
     
-    chart = new Chart(ctx, {
+    const years = statData.data.map(d => d.year);
+    const values = statData.data.map(d => d.value);
+    
+    // Color schemes for different stats
+    const colors = {
+        literacy: { border: 'rgb(13, 110, 253)', bg: 'rgba(13, 110, 253, 0.1)' },
+        attainment: { border: 'rgb(25, 135, 84)', bg: 'rgba(25, 135, 84, 0.1)' },
+        graduation: { border: 'rgb(13, 202, 240)', bg: 'rgba(13, 202, 240, 0.1)' },
+        enrollment: { border: 'rgb(255, 193, 7)', bg: 'rgba(255, 193, 7, 0.1)' },
+        proficiency: { border: 'rgb(220, 53, 69)', bg: 'rgba(220, 53, 69, 0.1)' },
+        early_childhood: { border: 'rgb(108, 117, 125)', bg: 'rgba(108, 117, 125, 0.1)' }
+    };
+    
+    const color = colors[statName] || { border: 'rgb(75, 192, 192)', bg: 'rgba(75, 192, 192, 0.2)' };
+    
+    charts[statName] = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: [],
+            labels: years,
             datasets: [{
-                label: 'Value',
-                data: [],
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                tension: 0.1
+                label: statData.name,
+                data: values,
+                borderColor: color.border,
+                backgroundColor: color.bg,
+                borderWidth: 2,
+                tension: 0.4,
+                pointRadius: years.length > 50 ? 0 : 3,
+                pointHoverRadius: 5
             }]
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
                 title: {
-                    display: true,
-                    text: 'Educational Statistics Over Time'
+                    display: false
                 },
                 legend: {
-                    display: true
+                    display: false
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.dataset.label || '';
+                            if (label) {
+                                label += ': ';
+                            }
+                            label += context.parsed.y.toFixed(1);
+                            if (statName !== 'proficiency' && statName !== 'early_childhood') {
+                                label += '%';
+                            }
+                            return label;
+                        }
+                    }
                 }
             },
             scales: {
-                y: {
-                    beginAtZero: false,
+                x: {
                     title: {
+                        display: true,
+                        text: 'Year'
+                    },
+                    ticks: {
+                        maxTicksLimit: 10
+                    }
+                },
+                y: {
+                    beginAtZero: statName === 'graduation' || statName === 'enrollment',
+                    title: {
+                        display: true,
+                        text: getYAxisLabel(statName)
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            if (statName !== 'proficiency' && statName !== 'early_childhood') {
+                                return value + '%';
+                            }
+                            return value;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function populateTable(tableId, statData) {
+    const table = document.getElementById(tableId);
+    if (!table) return;
+    
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = '';
+    
+    statData.data.forEach(point => {
+        const row = tbody.insertRow();
+        row.insertCell(0).textContent = point.year;
+        const valueCell = row.insertCell(1);
+        valueCell.textContent = point.value.toFixed(1);
+    });
+}
+
+function getYAxisLabel(statName) {
+    const labels = {
+        literacy: 'Literacy Rate (%)',
+        attainment: 'Bachelor\'s Degree or Higher (%)',
+        graduation: 'Graduation Rate (%)',
+        enrollment: 'Enrollment Rate (%)',
+        proficiency: 'Average Score (0-500 scale)',
+        early_childhood: 'Average Score (0-100 scale)'
+    };
+    return labels[statName] || 'Value';
+}
+
                         display: true,
                         text: 'Value'
                     }
