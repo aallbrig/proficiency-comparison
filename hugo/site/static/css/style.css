@@ -12,24 +12,156 @@ main {
     border-radius: 8px;
 }
 
-#timeline {
-    background: linear-gradient(to right, #e3f2fd 0%, #bbdefb 100%);
-    height: 100px;
-    border-radius: 8px;
+/* Comparison Tables as Balloons */
+.comparison-table-card {
+    background: white;
+    border: 2px solid #dee2e6;
+    border-radius: 12px;
+    padding: 1rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.comparison-table-card.highlighted {
+    border-color: #ffc107;
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.6);
+    transform: scale(1.02);
+}
+
+.comparison-table-card .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    padding: 0.75rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 8px 8px 0 0;
+}
+
+.generation-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+.generation-baby-boomer { background-color: #ff6b6b; color: white; }
+.generation-x { background-color: #4ecdc4; color: white; }
+.generation-millennial { background-color: #45b7d1; color: white; }
+.generation-z { background-color: #96ceb4; color: white; }
+.generation-alpha { background-color: #dda15e; color: white; }
+.generation-other { background-color: #95a5a6; color: white; }
+
+.birth-year-input {
+    font-size: 1.25rem;
+    font-weight: bold;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    width: 100px;
+    text-align: center;
+}
+
+.birth-year-input:focus {
+    outline: none;
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.stat-value {
+    font-weight: 600;
+    color: #212529;
+}
+
+/* Timeline Styles */
+#timelineWrapper {
+    min-height: 150px;
+    padding: 20px 0;
+}
+
+.timeline-track {
+    background: linear-gradient(to right, #e3f2fd 0%, #bbdefb 50%, #e3f2fd 100%);
+    height: 80px;
+    border-radius: 40px;
     position: relative;
-    margin: 20px 0;
-    border: 2px solid #2196f3;
+    border: 3px solid #2196f3;
+    cursor: pointer;
 }
 
-#markersDisplay .badge {
-    font-size: 0.9rem;
-    padding: 8px 12px;
-    transition: all 0.2s;
+.timeline-labels {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 10px;
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #6c757d;
 }
 
-#markersDisplay .badge:hover {
-    transform: scale(1.1);
+.timeline-markers {
+    position: absolute;
+    top: 20px;
+    left: 0;
+    right: 0;
+    height: 80px;
+    pointer-events: none;
+}
+
+.timeline-marker {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 3px solid white;
+    cursor: grab;
+    pointer-events: all;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: white;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.timeline-marker:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.timeline-marker.highlighted {
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+    transform: translate(-50%, -50%) scale(1.3);
+}
+
+.timeline-marker.dragging {
+    cursor: grabbing;
     opacity: 0.8;
+    z-index: 1000;
+}
+
+.timeline-marker.red {
+    background-color: #dc3545;
+}
+
+.timeline-marker.blue {
+    background-color: #0d6efd;
 }
 
 .table th {
@@ -44,6 +176,17 @@ footer {
     max-width: 150px;
 }
 
+/* Settings Modal */
+.form-check-group .form-check {
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+}
+
+.form-check-group .form-check:hover {
+    background-color: #f8f9fa;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     #qrcode {
@@ -52,6 +195,16 @@ footer {
     
     .col-md-6.text-md-end {
         text-align: center !important;
+    }
+    
+    .comparison-table-card {
+        margin-bottom: 1rem;
+    }
+    
+    .timeline-marker {
+        width: 25px;
+        height: 25px;
+        font-size: 0.6rem;
     }
 }
 
@@ -69,4 +222,14 @@ footer {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Button animations */
+.btn {
+    transition: all 0.2s ease;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }

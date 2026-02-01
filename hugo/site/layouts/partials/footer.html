@@ -7,6 +7,7 @@
             </div>
             <div class="col-md-6 text-md-end">
                 <h5>Share This Page</h5>
+                <p class="small text-muted">Scan to open current comparison</p>
                 <div id="qrcode" class="d-inline-block bg-white p-2 rounded"></div>
             </div>
         </div>
@@ -17,14 +18,3 @@
         </div>
     </div>
 </footer>
-
-<script>
-// Generate QR code for current URL
-if (typeof QRCode !== 'undefined') {
-    new QRCode(document.getElementById("qrcode"), {
-        text: window.location.href,
-        width: 128,
-        height: 128
-    });
-}
-</script>

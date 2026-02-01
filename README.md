@@ -188,12 +188,16 @@ npm test
 
 ### Website Features
 
-- **Interactive Timeline**: Add/remove birth year markers to compare cohorts
-- **Stat Selection**: Dropdown to choose different educational metrics
-- **Data Visualization**: Chart.js graphs showing trends over time
-- **URL Sharing**: Shareable URLs with current configuration
+- **Comparison Tables**: Visual cards showing stats for each birth year cohort with generational labels (Baby Boomer, Generation X, Millennial, Generation Z, Generation Alpha)
+- **Interactive Timeline**: Click to add markers, drag to adjust birth years
+- **Linked Highlighting**: Click markers or tables to highlight both simultaneously
+- **Settings Modal**: Select which statistics to display in comparisons
+- **Editable Birth Years**: Change cohort years directly in comparison tables
+- **Data Visualization**: Chart.js graphs showing trends over time (on data page)
+- **URL Sharing**: Shareable URLs with current configuration (cohorts and stats)
 - **QR Codes**: Generate QR codes for easy mobile sharing
 - **Responsive Design**: Bootstrap-based mobile-friendly interface
+- **Dynamic Data Detection**: Only shows statistics with available data
 
 ## License
 
