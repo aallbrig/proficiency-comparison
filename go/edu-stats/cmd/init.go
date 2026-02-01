@@ -22,6 +22,7 @@ This command will:
 
 func runInit(cmd *cobra.Command, args []string) error {
 	fmt.Println("Initializing database from schema.sql...")
+	fmt.Printf("Database location: %s\n", database.GetDatabasePath())
 	fmt.Println()
 
 	db, err := database.Open()
@@ -44,7 +45,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("failed to verify database: %w", err)
 	}
 
-	fmt.Printf("✓ Database file: edu_stats.db\n")
+	fmt.Printf("✓ Database file: %s\n", database.GetDatabasePath())
 	fmt.Printf("✓ Total tables: %d\n", dbInfo.TableCount)
 	fmt.Printf("✓ Schema status: %s\n", dbInfo.SchemaStatus)
 	
@@ -54,6 +55,7 @@ func runInit(cmd *cobra.Command, args []string) error {
 	tables := []string{
 		"pipeline_metadata",
 		"source_metadata",
+		"raw_files",
 		"literacy_rates",
 		"educational_attainment",
 		"graduation_rates",
@@ -78,6 +80,8 @@ func runInit(cmd *cobra.Command, args []string) error {
 	fmt.Println("Next steps:")
 	fmt.Println("  1. Check status: edu-stats status")
 	fmt.Println("  2. Download data: edu-stats all --years=1970-2025")
+	fmt.Println()
+	fmt.Println("Note: Database location can be changed by setting EDU_STATS_DATA_DIR environment variable")
 	
 	return nil
 }

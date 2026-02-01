@@ -32,11 +32,34 @@ type StatData struct {
 func (h *HugoGenerator) GenerateAll() error {
 	fmt.Println("  Generating Hugo JSON assets...")
 
-	// Create output directory
-	outputDir := filepath.Join("..", "..", "hugo", "site", "static", "data")
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		return fmt.Errorf("failed to create output directory: %w", err)
+	// Try multiple locations for Hugo site
+	hugoOutputLocations := []string{
+		filepath.Join("hugo", "site", "static", "data"),                    // From repo root
+		filepath.Join("..", "..", "hugo", "site", "static", "data"),         // From go/edu-stats/
+		filepath.Join("..", "..", "..", "hugo", "site", "static", "data"),   // From go/edu-stats/cmd/
+		filepath.Join(os.Getenv("HOME"), "src", "proficiency-comparison", "hugo", "site", "static", "data"), // Absolute fallback
 	}
+	
+	var outputDir string
+	for _, loc := range hugoOutputLocations {
+		// Check if this looks like it might be the right location
+		hugoDir := filepath.Dir(filepath.Dir(loc)) // Go up to hugo/site/
+		if _, err := os.Stat(filepath.Join(hugoDir, "config.toml")); err == nil {
+			outputDir = loc
+			break
+		}
+	}
+	
+	if outputDir == "" {
+		// Fall back to first option and create it
+		outputDir = hugoOutputLocations[0]
+	}
+	
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory %s: %w", outputDir, err)
+	}
+	
+	fmt.Printf("    Output directory: %s\n", outputDir)
 
 	generators := []struct {
 		name     string

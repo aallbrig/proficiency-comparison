@@ -127,8 +127,8 @@ func (n *NCESDownloader) downloadFile(url, sourceName string) (string, error) {
 		return "", fmt.Errorf("HTTP %d", resp.StatusCode)
 	}
 	
-	// Create downloads directory
-	downloadDir := "data/downloads"
+	// Create downloads directory in the data directory
+	downloadDir := filepath.Join(database.GetDataDir(), "downloads")
 	os.MkdirAll(downloadDir, 0755)
 	
 	// Save file
