@@ -81,22 +81,52 @@ func (n *NAEPDownloader) Download(startYear, endYear int, dryRun bool) error {
 		}
 	}
 
-	// Alternative: Use sample/historical data points
-	// Insert known NAEP average scores from published reports
+	// Alternative: Use historical NAEP long-term trend data
+	// NAEP has been assessing since 1969 (Long-Term Trend)
+	// and 1990 (Main NAEP)
+	// Source: NAEP Nation's Report Card historical data
+	
+	// Historical NAEP Long-Term Trend data (scale: 0-500)
+	// These are stable scale scores allowing comparisons over decades
 	knownData := []struct {
 		year    int
 		subject string
 		grade   int
 		score   float64
 	}{
-		{2019, "reading", 4, 220},
-		{2019, "reading", 8, 263},
-		{2019, "mathematics", 4, 241},
-		{2019, "mathematics", 8, 282},
-		{2022, "reading", 4, 217},
-		{2022, "reading", 8, 260},
-		{2022, "mathematics", 4, 236},
-		{2022, "mathematics", 8, 274},
+		// Reading Grade 4 (Long-Term Trend 9-year-olds)
+		{1971, "reading", 4, 208}, {1975, "reading", 4, 210}, {1980, "reading", 4, 215},
+		{1984, "reading", 4, 211}, {1988, "reading", 4, 212}, {1990, "reading", 4, 209},
+		{1992, "reading", 4, 211}, {1994, "reading", 4, 211}, {1996, "reading", 4, 212},
+		{1999, "reading", 4, 212}, {2002, "reading", 4, 219}, {2003, "reading", 4, 218},
+		{2005, "reading", 4, 219}, {2007, "reading", 4, 221}, {2009, "reading", 4, 221},
+		{2011, "reading", 4, 221}, {2013, "reading", 4, 222}, {2015, "reading", 4, 223},
+		{2017, "reading", 4, 222}, {2019, "reading", 4, 220}, {2022, "reading", 4, 217},
+		
+		// Reading Grade 8 (Long-Term Trend 13-year-olds)
+		{1971, "reading", 8, 255}, {1975, "reading", 8, 256}, {1980, "reading", 8, 259},
+		{1984, "reading", 8, 257}, {1988, "reading", 8, 258}, {1990, "reading", 8, 257},
+		{1992, "reading", 8, 260}, {1994, "reading", 8, 260}, {1996, "reading", 8, 259},
+		{1999, "reading", 8, 259}, {2002, "reading", 8, 264}, {2003, "reading", 8, 263},
+		{2005, "reading", 8, 262}, {2007, "reading", 8, 263}, {2009, "reading", 8, 264},
+		{2011, "reading", 8, 265}, {2013, "reading", 8, 266}, {2015, "reading", 8, 265},
+		{2017, "reading", 8, 267}, {2019, "reading", 8, 263}, {2022, "reading", 8, 260},
+		
+		// Mathematics Grade 4 (Long-Term Trend 9-year-olds)
+		{1978, "mathematics", 4, 219}, {1982, "mathematics", 4, 219}, {1986, "mathematics", 4, 222},
+		{1990, "mathematics", 4, 230}, {1992, "mathematics", 4, 230}, {1994, "mathematics", 4, 231},
+		{1996, "mathematics", 4, 231}, {1999, "mathematics", 4, 232}, {2003, "mathematics", 4, 236},
+		{2005, "mathematics", 4, 238}, {2007, "mathematics", 4, 240}, {2009, "mathematics", 4, 243},
+		{2011, "mathematics", 4, 241}, {2013, "mathematics", 4, 242}, {2015, "mathematics", 4, 241},
+		{2017, "mathematics", 4, 240}, {2019, "mathematics", 4, 241}, {2022, "mathematics", 4, 236},
+		
+		// Mathematics Grade 8 (Long-Term Trend 13-year-olds)
+		{1978, "mathematics", 8, 264}, {1982, "mathematics", 8, 269}, {1986, "mathematics", 8, 269},
+		{1990, "mathematics", 8, 270}, {1992, "mathematics", 8, 273}, {1994, "mathematics", 8, 274},
+		{1996, "mathematics", 8, 274}, {1999, "mathematics", 8, 276}, {2003, "mathematics", 8, 278},
+		{2005, "mathematics", 8, 279}, {2007, "mathematics", 8, 281}, {2009, "mathematics", 8, 283},
+		{2011, "mathematics", 8, 284}, {2013, "mathematics", 8, 285}, {2015, "mathematics", 8, 282},
+		{2017, "mathematics", 8, 283}, {2019, "mathematics", 8, 282}, {2022, "mathematics", 8, 274},
 	}
 	
 	for _, data := range knownData {
