@@ -70,6 +70,10 @@ function renderChart(canvasId, statData, statName) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
             plugins: {
                 title: {
                     display: false
@@ -78,6 +82,8 @@ function renderChart(canvasId, statData, statName) {
                     display: false
                 },
                 tooltip: {
+                    mode: 'index',
+                    intersect: false,
                     callbacks: {
                         label: function(context) {
                             let label = context.dataset.label || '';
@@ -118,6 +124,10 @@ function renderChart(canvasId, statData, statName) {
                         }
                     }
                 }
+            },
+            hover: {
+                mode: 'index',
+                intersect: false
             }
         }
     });
