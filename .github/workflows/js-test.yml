@@ -1,0 +1,35 @@
+name: JavaScript Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Run JS Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: ./hugo/site/package-lock.json
+        
+    - name: Install dependencies
+      working-directory: ./hugo/site
+      run: npm ci
+      
+    - name: Run tests
+      working-directory: ./hugo/site
+      run: npm test
+      
+    - name: Check test coverage
+      working-directory: ./hugo/site
+      run: npm test -- --coverage || true
