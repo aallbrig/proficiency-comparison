@@ -14,8 +14,18 @@
                     </h2>
                 </div>
                 <div class="card-body">
-                    <p><strong>Description:</strong> Adult literacy rates (15+) showing the progression from 80% (1870) to near-universal literacy (99%) by 1980.</p>
-                    <p><strong>Source:</strong> NCES "120 Years of American Education" historical data</p>
+                    <h5>What This Measures</h5>
+                    <p><strong>Basic literacy:</strong> The percentage of adults (age 15+) who can read and write at a basic level - meaning they can understand simple written instructions, read a newspaper headline, or write their name and a simple note.</p>
+                    
+                    <h5>Why It Matters</h5>
+                    <p>Literacy is the foundation of all education and civic participation. In 1870, one in five Americans couldn't read - often due to lack of schools, especially in rural areas and for formerly enslaved populations. By 1980, basic literacy became nearly universal (99%) thanks to compulsory education laws and public school expansion.</p>
+                    
+                    <div class="alert alert-info mb-3">
+                        <strong>Historical Context:</strong> The dramatic rise from 80% (1870) to 99% (1980) represents one of America's greatest educational achievements. Post-Civil War education reforms, Progressive Era school expansion, and New Deal programs all contributed to this transformation.
+                    </div>
+                    
+                    <p><strong>Data Source:</strong> NCES "120 Years of American Education" historical statistics (1870-2000), with consistent methodology extended to present day.</p>
+                    
                     <canvas id="literacy-chart" height="80"></canvas>
                     
                     <!-- Collapsible Raw Data -->
@@ -45,8 +55,24 @@
                     </h2>
                 </div>
                 <div class="card-body">
-                    <p><strong>Description:</strong> Percentage of adults (25+) with bachelor's degree or higher. Shows dramatic expansion from 4.6% (1940) to 33%+ (2023).</p>
-                    <p><strong>Source:</strong> US Census Bureau historical tables and American Community Survey API</p>
+                    <h5>What This Measures</h5>
+                    <p><strong>Bachelor's degree attainment:</strong> The percentage of adults age 25 and older who have completed at least a four-year college degree (bachelor's, master's, doctoral, or professional degree).</p>
+                    
+                    <h5>Why It Matters</h5>
+                    <p>Higher education levels correlate with higher lifetime earnings, better health outcomes, and increased civic engagement. This metric shows the transformation of college from an elite privilege (4.6% in 1940) to a common credential (33%+ today). It reflects changing job market demands, GI Bill impacts, and expanding access to higher education.</p>
+                    
+                    <div class="alert alert-info mb-3">
+                        <strong>Key Turning Points:</strong> 
+                        <ul class="mb-0">
+                            <li><strong>1944:</strong> GI Bill dramatically expands college access for veterans</li>
+                            <li><strong>1960s-70s:</strong> Baby Boomers enter college; percentage doubles</li>
+                            <li><strong>1980s-90s:</strong> Knowledge economy demands push rates higher</li>
+                            <li><strong>2000s:</strong> Over 1 in 4 adults hold bachelor's degrees</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Data Source:</strong> US Census Bureau Historical Tables on Educational Attainment (1940-2009) and American Community Survey API (2010-2023).</p>
+                    
                     <canvas id="attainment-chart" height="80"></canvas>
                     
                     <div class="mt-3">
@@ -75,8 +101,25 @@
                     </h2>
                 </div>
                 <div class="card-body">
-                    <p><strong>Description:</strong> Four-year cohort graduation rates showing growth from 2% (1870) to 87% (2022). Reflects the transformation of high school from elite to near-universal.</p>
-                    <p><strong>Source:</strong> NCES Digest of Education Statistics, Table 219.46</p>
+                    <h5>What This Measures</h5>
+                    <p><strong>Four-year cohort graduation rate:</strong> The percentage of students who enter high school and earn a standard diploma within four years. For historical data, this represents the percentage of 17-year-olds who graduated from high school.</p>
+                    
+                    <h5>Why It Matters</h5>
+                    <p>High school graduation is the gateway to economic opportunity and higher education. A high school diploma is now essential for most jobs, but in 1870, only 2% graduated - high school was for the elite. The rise to 87% represents the democratization of secondary education through compulsory attendance laws, child labor restrictions, and the shift from an agricultural to industrial economy.</p>
+                    
+                    <div class="alert alert-info mb-3">
+                        <strong>Historical Milestones:</strong>
+                        <ul class="mb-0">
+                            <li><strong>1870:</strong> 2% - High school was rare, mainly for wealthy families</li>
+                            <li><strong>1920:</strong> 16.8% - Progressive Era reforms expand access</li>
+                            <li><strong>1940:</strong> 50.8% - Half of youth now graduate</li>
+                            <li><strong>1970:</strong> 76.9% - High school becomes the norm</li>
+                            <li><strong>2022:</strong> 87% - Near-universal secondary education</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Data Source:</strong> NCES Digest of Education Statistics, Table 219.46 - historical compilations from state/federal records.</p>
+                    
                     <canvas id="graduation-chart" height="80"></canvas>
                     
                     <div class="mt-3">
@@ -105,8 +148,25 @@
                     </h2>
                 </div>
                 <div class="card-body">
-                    <p><strong>Description:</strong> K-12 enrollment rates (ages 5-17) from 50% (1870) to 94.5% (2022). Shows impact of compulsory education laws and COVID-19.</p>
-                    <p><strong>Source:</strong> NCES Digest of Education Statistics, Table 103.20</p>
+                    <h5>What This Measures</h5>
+                    <p><strong>School enrollment rate:</strong> The percentage of children ages 5-17 enrolled in elementary and secondary schools (K-12). This shows who is actually attending school, not just who is eligible.</p>
+                    
+                    <h5>Why It Matters</h5>
+                    <p>Enrollment rates reflect societal values about childhood, education, and work. In 1870, only half of children attended school - many worked on farms or in factories instead. The rise to 94.5% represents compulsory education laws (1852-1918), child labor restrictions, and the social transformation that made childhood about learning, not earning.</p>
+                    
+                    <div class="alert alert-info mb-3">
+                        <strong>Forces Driving Change:</strong>
+                        <ul class="mb-0">
+                            <li><strong>1852-1918:</strong> States pass compulsory attendance laws</li>
+                            <li><strong>1900-1938:</strong> Child labor laws remove children from workforce</li>
+                            <li><strong>1920s-1930s:</strong> Great Depression makes jobs scarce; school becomes option</li>
+                            <li><strong>1940s+:</strong> School attendance becomes social norm</li>
+                            <li><strong>2020-2021:</strong> COVID-19 disrupts enrollment (visible dip in data)</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Data Source:</strong> NCES Digest of Education Statistics, Table 103.20 - historical surveys and census data.</p>
+                    
                     <canvas id="enrollment-chart" height="80"></canvas>
                     
                     <div class="mt-3">
@@ -135,8 +195,24 @@
                     </h2>
                 </div>
                 <div class="card-body">
-                    <p><strong>Description:</strong> National Assessment of Educational Progress long-term trend scores for reading and math at grades 4 and 8. Scale: 0-500.</p>
-                    <p><strong>Source:</strong> NAEP Long-Term Trend Assessments</p>
+                    <h5>What This Measures</h5>
+                    <p><strong>NAEP Long-Term Trend scores:</strong> Average reading and mathematics assessment scores for 9-year-olds (grade 4) and 13-year-olds (grade 8) on a 0-500 scale. These are standardized tests given to representative samples of students nationwide.</p>
+                    
+                    <h5>Why It Matters</h5>
+                    <p>NAEP is called "The Nation's Report Card" - it's the only consistent measure of student achievement across all 50 states over decades. Unlike graduation rates or enrollment (which measure access), NAEP measures <em>what students actually know</em>. The long-term trend allows us to compare today's 4th graders with those from 1971.</p>
+                    
+                    <div class="alert alert-info mb-3">
+                        <strong>Key Findings:</strong>
+                        <ul class="mb-0">
+                            <li><strong>Reading:</strong> Relatively stable since 1970s (208-223 range for grade 4)</li>
+                            <li><strong>Math:</strong> Significant gains from 1978 to 2013 (219→242 for grade 4)</li>
+                            <li><strong>Recent decline:</strong> 2020-2022 scores dropped due to COVID-19 disruptions</li>
+                            <li><strong>Scale:</strong> A 10-point gain ≈ one year of learning</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Data Source:</strong> National Assessment of Educational Progress (NAEP) Long-Term Trend Assessments, administered by NCES. Data averaged across reading and math for grades 4 and 8.</p>
+                    
                     <canvas id="proficiency-chart" height="80"></canvas>
                     
                     <div class="mt-3">
@@ -165,8 +241,25 @@
                     </h2>
                 </div>
                 <div class="card-body">
-                    <p><strong>Description:</strong> Kindergarten entry reading and math scores from ECLS cohort studies. Scale: 0-100. Shows COVID-19 impact on early learning.</p>
-                    <p><strong>Source:</strong> NCES Early Childhood Longitudinal Study (ECLS-K)</p>
+                    <h5>What This Measures</h5>
+                    <p><strong>Kindergarten entry scores:</strong> Average reading and mathematics assessment scores (0-100 scale) for children entering kindergarten in the fall, based on the Early Childhood Longitudinal Study (ECLS) cohort assessments.</p>
+                    
+                    <h5>Why It Matters</h5>
+                    <p>Early childhood readiness predicts later academic success. These scores show what children know when they start formal schooling - reflecting the quality of pre-K programs, parental education, and early learning environments. Children who start kindergarten behind often stay behind without intervention.</p>
+                    
+                    <div class="alert alert-info mb-3">
+                        <strong>What the Scores Tell Us:</strong>
+                        <ul class="mb-0">
+                            <li><strong>Baseline (1998):</strong> Reading: 38, Math: 36 - established with ECLS-K cohort</li>
+                            <li><strong>Improvement trend:</strong> Gradual gains through 2019 as pre-K expands</li>
+                            <li><strong>COVID-19 impact (2020-2021):</strong> Sharp drop in scores due to preschool closures and isolation</li>
+                            <li><strong>Recovery (2022):</strong> Scores rebounding but not yet back to 2019 levels</li>
+                            <li><strong>Context:</strong> A 5-point gain represents roughly 6 months of learning</li>
+                        </ul>
+                    </div>
+                    
+                    <p><strong>Data Source:</strong> NCES Early Childhood Longitudinal Study, Kindergarten Class (ECLS-K:1998 and ECLS-K:2011) with trend estimates from published reports.</p>
+                    
                     <canvas id="early_childhood-chart" height="80"></canvas>
                     
                     <div class="mt-3">
