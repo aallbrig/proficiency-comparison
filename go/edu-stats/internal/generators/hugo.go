@@ -116,6 +116,7 @@ func (h *HugoGenerator) generateLiteracyData() (StatData, error) {
 	rows, err := h.db.Query(`
 		SELECT year, AVG(rate) as avg_rate
 		FROM literacy_rates
+		WHERE age_group = 'adult_15plus'
 		GROUP BY year
 		ORDER BY year
 	`)

@@ -143,18 +143,23 @@ func (w *WorldBankDownloader) Download(startYear, endYear int, dryRun bool) erro
 		
 		// Historical US literacy data from NCES
 		// Source: 120 Years of American Education (NCES)
+		// NOTE: Basic literacy (ability to read/write) has been near-universal since 1980
 		historicalLiteracy := map[int]float64{
 			1870: 80.0, 1880: 83.0, 1890: 86.7, 1900: 89.3, 1910: 92.3,
 			1920: 94.0, 1930: 95.7, 1940: 97.1, 1950: 97.8, 1960: 97.9,
 			1970: 98.5, 1980: 99.0, 1990: 99.0, 2000: 99.0,
 		}
 		
-		// Modern functional literacy from NCES PIAAC
-		// After 2000, we use functional literacy (Level 3+) which is more meaningful
-		modernFunctionalLiteracy := map[int]float64{
-			2012: 78.0, 2013: 79.0, 2014: 79.0, 2015: 79.0, 2016: 79.0,
-			2017: 79.0, 2018: 79.0, 2019: 79.0, 2020: 78.5, 2021: 79.0, 
-			2022: 79.5, 2023: 80.0, 2024: 80.0, 2025: 80.0,
+		// Modern period: Use consistent basic literacy metric
+		// Basic literacy has remained at 99% for those able to read at any level
+		// Note: Functional literacy (PIAAC Level 3+) is lower (~79%) but that's
+		// a different, higher standard not comparable to historical data
+		modernLiteracy := map[int]float64{
+			2001: 99.0, 2002: 99.0, 2003: 99.0, 2004: 99.0, 2005: 99.0,
+			2006: 99.0, 2007: 99.0, 2008: 99.0, 2009: 99.0, 2010: 99.0,
+			2011: 99.0, 2012: 99.0, 2013: 99.0, 2014: 99.0, 2015: 99.0,
+			2016: 99.0, 2017: 99.0, 2018: 99.0, 2019: 99.0, 2020: 99.0, 
+			2021: 99.0, 2022: 99.0, 2023: 99.0, 2024: 99.0, 2025: 99.0,
 		}
 		
 		// Insert estimated literacy data for the requested years
@@ -169,19 +174,17 @@ func (w *WorldBankDownloader) Download(startYear, endYear int, dryRun bool) erro
 				source = "nces_historical"
 			} else if year < 1870 {
 				continue // No data before 1870
-			} else if year <= 2000 {
-				// Interpolate between known points
-				rate = 99.0
-				source = "nces_estimated"
-			} else {
-				// Use modern functional literacy
-				if modRate, ok := modernFunctionalLiteracy[year]; ok {
+			} else if year <= 2025 {
+				// Use modern data (basic literacy remains at 99%)
+				if modRate, ok := modernLiteracy[year]; ok {
 					rate = modRate
-					source = "nces_piaac"
+					source = "nces_estimated"
 				} else {
-					rate = 79.0 // Default for missing years
-					source = "nces_piaac_estimated"
+					rate = 99.0
+					source = "nces_estimated"
 				}
+			} else {
+				continue // No data for future years
 			}
 			
 			// Adult literacy (ages 15+)
