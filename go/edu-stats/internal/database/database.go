@@ -10,7 +10,41 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-const DatabaseFile = "data/edu_stats.db"
+var DatabaseFile string
+
+func init() {
+	// Get user config/data directory (follows XDG Base Directory Specification)
+	configDir := os.Getenv("EDU_STATS_DATA_DIR")
+	
+	if configDir == "" {
+		// Use XDG_DATA_HOME or fallback to ~/.local/share
+		if xdgDataHome := os.Getenv("XDG_DATA_HOME"); xdgDataHome != "" {
+			configDir = filepath.Join(xdgDataHome, "edu-stats")
+		} else if homeDir, err := os.UserHomeDir(); err == nil {
+			configDir = filepath.Join(homeDir, ".local", "share", "edu-stats")
+		} else {
+			// Last resort fallback to current directory
+			configDir = "data"
+		}
+	}
+	
+	// Ensure directory exists
+	if err := os.MkdirAll(configDir, 0755); err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: failed to create data directory %s: %v\n", configDir, err)
+		configDir = "data"
+		os.MkdirAll(configDir, 0755)
+	}
+	
+	DatabaseFile = filepath.Join(configDir, "edu_stats.db")
+}
+
+func GetDatabasePath() string {
+	return DatabaseFile
+}
+
+func GetDataDir() string {
+	return filepath.Dir(DatabaseFile)
+}
 
 func Open() (*sql.DB, error) {
 	db, err := sql.Open("sqlite3", DatabaseFile)
@@ -30,32 +64,45 @@ func Open() (*sql.DB, error) {
 func ApplySchema(db *sql.DB) error {
 	schemaPath := "schema.sql"
 	
-	// Try multiple locations
+	// Try multiple locations in order:
+	// 1. Current directory
+	// 2. Repository root (../../ from binary location)
+	// 3. /usr/share/edu-stats/ (system install)
+	// 4. Same directory as executable
+	
+	execPath, _ := os.Executable()
+	execDir := filepath.Dir(execPath)
+	
 	locations := []string{
-		schemaPath,
-		filepath.Join("..", "..", schemaPath),
-		filepath.Join("..", "..", "..", schemaPath),
+		schemaPath,                                    // Current directory
+		filepath.Join("..", "..", schemaPath),         // From go/edu-stats/
+		filepath.Join("..", "..", "..", schemaPath),   // From go/edu-stats/cmd/
+		filepath.Join(execDir, schemaPath),            // Same as executable
+		filepath.Join(execDir, "..", "..", schemaPath), // From installed location
+		"/usr/share/edu-stats/schema.sql",            // System install
 	}
 	
 	var schemaBytes []byte
 	var err error
+	var foundLocation string
 	
 	for _, loc := range locations {
 		schemaBytes, err = os.ReadFile(loc)
 		if err == nil {
+			foundLocation = loc
 			break
 		}
 	}
 	
 	if err != nil {
-		return fmt.Errorf("failed to read schema.sql: %w", err)
+		return fmt.Errorf("failed to find schema.sql (searched %d locations): %w", len(locations), err)
 	}
 
 	if _, err := db.Exec(string(schemaBytes)); err != nil {
-		return fmt.Errorf("failed to apply schema: %w", err)
+		return fmt.Errorf("failed to apply schema from %s: %w", foundLocation, err)
 	}
 
-	fmt.Println("✓ Database schema applied successfully")
+	fmt.Printf("✓ Database schema applied successfully (from %s)\n", foundLocation)
 	return nil
 }
 

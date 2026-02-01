@@ -20,6 +20,8 @@ func runStatus(cmd *cobra.Command, args []string) error {
 	fmt.Println("Educational Stats CLI - Status Report")
 	fmt.Println("=====================================")
 	fmt.Println()
+	fmt.Printf("📍 Database location: %s\n", database.GetDatabasePath())
+	fmt.Println()
 
 	db, err := database.Open()
 	if err != nil {
