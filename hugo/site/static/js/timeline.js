@@ -7,8 +7,9 @@ let availableStats = []; // Stats with actual data
 let dragState = null; // Current drag operation
 
 // Constants
-const MIN_YEAR = 1950;
-const MAX_YEAR = 2020;
+// Timeline configuration - spans full historical range
+const MIN_YEAR = 1870;  // Start of historical education data
+const MAX_YEAR = 2025;  // Current year + projection
 const MARKER_COLORS = ['red', 'blue'];
 
 // Stat metadata
