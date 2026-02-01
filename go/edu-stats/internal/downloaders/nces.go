@@ -31,7 +31,7 @@ func (n *NCESDownloader) Download(startYear, endYear int, dryRun bool) error {
 
 	fmt.Println("  Downloading NCES graduation and enrollment data...")
 	
-	// NCES Digest tables - updated for d23 (2023 edition)
+	// NCES Digest tables - d22 is latest available (as of Feb 2026)
 	tables := []struct {
 		name     string
 		url      string
@@ -40,13 +40,13 @@ func (n *NCESDownloader) Download(startYear, endYear int, dryRun bool) error {
 	}{
 		{
 			name:     "Graduation rates (Table 219.46)",
-			url:      "https://nces.ed.gov/programs/digest/d23/tables/xls/tabn219.46.xls",
+			url:      "https://nces.ed.gov/programs/digest/d22/tables/xls/tabn219.46.xls",
 			sheetIdx: 0,
 			dataType: "graduation",
 		},
 		{
 			name:     "Enrollment rates (Table 103.20)",
-			url:      "https://nces.ed.gov/programs/digest/d23/tables/xls/tabn103.20.xls",
+			url:      "https://nces.ed.gov/programs/digest/d22/tables/xls/tabn103.20.xls",
 			sheetIdx: 0,
 			dataType: "enrollment",
 		},

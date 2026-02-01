@@ -14,6 +14,7 @@ import (
 var (
 	years  string
 	dryRun bool
+	force  bool
 )
 
 var allCmd = &cobra.Command{
@@ -28,6 +29,7 @@ Supports resumability - if interrupted, will continue from last successful step.
 func init() {
 	allCmd.Flags().StringVar(&years, "years", "1970-2025", "Year range to download (format: YYYY-YYYY)")
 	allCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Simulate without downloading data")
+	allCmd.Flags().BoolVar(&force, "force", false, "Force re-download all data (ignore resume)")
 	
 	// Add subcommands for individual steps
 	allCmd.AddCommand(checkSchemaCmd)
@@ -104,14 +106,17 @@ func runAll(cmd *cobra.Command, args []string) error {
 	}
 
 	startIndex := 0
-	if lastStep != "" {
-		fmt.Printf("📌 Resuming from last completed step: %s\n\n", lastStep)
+	if lastStep != "" && !force {
+		fmt.Printf("📌 Resuming from last completed step: %s\n", lastStep)
+		fmt.Printf("   Use --force to re-download all data\n\n")
 		for i, step := range steps {
 			if step.name == lastStep {
 				startIndex = i + 1
 				break
 			}
 		}
+	} else if force {
+		fmt.Printf("🔄 Force mode: re-downloading all data\n\n")
 	}
 
 	// Execute steps
