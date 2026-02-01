@@ -195,9 +195,36 @@ npm test
 - **Editable Birth Years**: Change cohort years directly in comparison tables
 - **Data Visualization**: Chart.js graphs showing trends over time (on data page)
 - **URL Sharing**: Shareable URLs with current configuration (cohorts and stats)
+  - Example: `/?cohorts=1970,1980,1990&stats=literacy,attainment`
 - **QR Codes**: Generate QR codes for easy mobile sharing
 - **Responsive Design**: Bootstrap-based mobile-friendly interface
 - **Dynamic Data Detection**: Only shows statistics with available data
+
+### Using the Website
+
+**Add Comparisons:**
+1. Click "Add Comparison" button to add a new cohort table
+2. Click on the timeline to add a marker at a specific year
+3. Use "Add Marker" button to enter a specific year
+
+**Edit Birth Years:**
+1. Click on the birth year input field in any comparison table
+2. Type a new year (1950-2020)
+3. The marker and data will update automatically
+
+**Highlight Linked Items:**
+- Click any marker on the timeline to highlight its comparison table
+- Click any comparison table to highlight its timeline marker
+- Tables will scroll into view when highlighted
+
+**Customize Statistics:**
+1. Click the gear/settings icon in the top right
+2. Check/uncheck statistics to show/hide in comparison tables
+3. Click "Save Changes"
+
+**Share Your Configuration:**
+- The URL updates automatically with your selections
+- Copy the URL or scan the QR code in the footer to share
 
 ## License
 
