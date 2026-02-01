@@ -115,7 +115,7 @@ func (c *CensusDownloader) Download(startYear, endYear int, dryRun bool) error {
 	
 	// Add historical Census data from published tables (1940-2009)
 	// Source: Census Historical Tables on Educational Attainment
-	fmt.Println("    Adding historical educational attainment data...")
+	fmt.Printf("    Adding historical educational attainment data (startYear=%d, endYear=%d)...\n", startYear, endYear)
 	
 	historicalData := map[int]float64{
 		1940: 4.6, 1950: 6.2, 1960: 7.7, 1970: 10.7, 1975: 13.9,
@@ -123,20 +123,28 @@ func (c *CensusDownloader) Download(startYear, endYear int, dryRun bool) error {
 		2005: 27.7, 2006: 28.0, 2007: 28.7, 2008: 29.4, 2009: 29.5,
 	}
 	
+	historicalAdded := 0
 	for year := startYear; year < 2010; year++ {
 		if percent, ok := historicalData[year]; ok {
 			_, err := c.db.Exec(`
 				INSERT INTO educational_attainment (year, age_group, education_level, percentage, source)
 				VALUES (?, ?, ?, ?, ?)
-				ON CONFLICT(year, age_group, education_level, state, demographics, source) DO UPDATE SET
+				ON CONFLICT(year, age_group, education_level, gender, race, source) DO UPDATE SET
 					percentage = excluded.percentage
 			`, year, "25plus", "bachelors_plus", percent, sourceName+"_historical")
 			
-			if err == nil {
+			if err != nil {
+				fmt.Printf("    ⚠ Failed to insert historical year %d: %v\n", year, err)
+			} else {
 				totalRows++
-				fmt.Printf("    ✓ Added historical year %d\n", year)
+				historicalAdded++
+				fmt.Printf("    ✓ Added historical year %d (%.1f%%)\n", year, percent)
 			}
 		}
+	}
+	
+	if historicalAdded > 0 {
+		fmt.Printf("    ✓ Added %d historical data points\n", historicalAdded)
 	}
 	
 	if totalRows > 0 {
