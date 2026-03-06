@@ -28,8 +28,10 @@ func Execute() {
 func init() {
 	rootCmd.AddCommand(statusCmd)
 	rootCmd.AddCommand(allCmd)
+	rootCmd.AddCommand(stepCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(upgradeCmd)
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(syncCmd)
+	rootCmd.AddCommand(resetCmd)
 }

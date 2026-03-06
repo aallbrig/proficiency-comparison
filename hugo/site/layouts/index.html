@@ -6,7 +6,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h1>Educational Statistics Comparison</h1>
-                    <p class="lead mb-0">Compare educational outcomes across birth year cohorts</p>
+                    <p class="lead mb-0">Compare educational outcomes across birth year cohorts. Data coverage is dynamically detected.</p>
                 </div>
                 <button id="settingsBtn" class="btn btn-outline-secondary" title="Settings">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
@@ -17,7 +17,7 @@
 
             <!-- Comparison Tables Section -->
             <div id="comparisonTablesContainer" class="mb-5">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
                     <h3>Cohort Comparisons</h3>
                     <button id="addTableBtn" class="btn btn-primary btn-sm">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-circle" viewBox="0 0 16 16">
@@ -27,17 +27,30 @@
                         Add Comparison
                     </button>
                 </div>
+
+                <!-- Quick preset comparison buttons -->
+                <div class="mb-3">
+                    <span class="text-muted small me-2">Quick compare:</span>
+                    <div class="preset-buttons d-inline-flex">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="loadPreset('boomers_vs_millennials')">Boomers vs Millennials</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="loadPreset('genx_vs_genz')">Gen X vs Gen Z</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="loadPreset('all_generations')">All Generations</button>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="loadPreset('three_way')">3-Generation Mix</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="clearAllMarkers()">Clear</button>
+                    </div>
+                </div>
+
                 <div id="comparisonTables" class="row g-3"></div>
                 <div id="noTablesMessage" class="alert alert-info">
-                    <p class="mb-0">No comparisons yet. Click "Add Comparison" or add a marker on the timeline below.</p>
+                    <p class="mb-0">No comparisons yet. Use a quick compare preset above, click "Add Comparison", or click anywhere on the timeline below.</p>
                 </div>
             </div>
 
             <!-- Timeline Section -->
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h3 class="card-title">Interactive Timeline</h3>
-                    <p class="text-muted">Click on the timeline to add markers, or drag existing markers to change birth years.</p>
+                    <h3 class="card-title">Birth Year Timeline</h3>
+                    <p class="text-muted">Click the timeline to add a birth year marker, or drag existing markers. Each cohort card shows stats measured at the <em>appropriate life stage</em> for that birth year (e.g. NAEP Grade 8 scores at age ~14, graduation rates at age ~18).</p>
                     
                     <div id="timelineWrapper" class="position-relative my-4">
                         <div id="timeline" class="timeline-track"></div>
@@ -46,7 +59,7 @@
                     </div>
                     
                     <div class="d-flex justify-content-between align-items-center mt-3">
-                        <span class="text-muted small">Birth Years: <span id="yearRange">1950-2020</span></span>
+                        <span class="text-muted small">Birth Years: <span id="yearRange">Loading...</span></span>
                         <button id="addMarkerFromTimelineBtn" class="btn btn-outline-primary btn-sm">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
@@ -63,7 +76,9 @@
                 <p>It looks like data hasn't been downloaded yet. To populate the database:</p>
                 <ol>
                     <li>Install the CLI tool: <code>edu-stats</code></li>
-                    <li>Run: <code>edu-stats all --years=1970-2025</code></li>
+                    <li>Run: <code>edu-stats all --years 2010-2024</code></li>
+                    <li>Generate assets: <code>edu-stats step generate-assets</code></li>
+                    <li>Rebuild Hugo: <code>cd hugo/site && hugo</code></li>
                     <li>Refresh this page</li>
                 </ol>
                 <hr>

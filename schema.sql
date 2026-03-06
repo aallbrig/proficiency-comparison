@@ -124,6 +124,17 @@ CREATE TABLE IF NOT EXISTS early_childhood (
     UNIQUE(year, cohort_year, metric_name, age_months, demographics, source)
 );
 
+-- Reset audit log
+CREATE TABLE IF NOT EXISTS reset_audit (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    reset_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    start_year INTEGER NOT NULL,
+    end_year INTEGER NOT NULL,
+    rows_deleted INTEGER NOT NULL,
+    execution_time_seconds REAL,
+    deletion_summary TEXT
+);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_literacy_year ON literacy_rates(year);
 CREATE INDEX IF NOT EXISTS idx_attainment_year ON educational_attainment(year);

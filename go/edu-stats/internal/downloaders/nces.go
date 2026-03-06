@@ -101,98 +101,21 @@ func (n *NCESDownloader) Download(startYear, endYear int, dryRun bool) error {
 	yearsRange := fmt.Sprintf("%d-%d", startYear, endYear)
 	if totalRows > 0 {
 		database.UpdateSourceMetadata(n.db, sourceName, yearsRange, totalRows, "success", "")
+		fmt.Printf("  ✓ NCES download complete: %d rows\n", totalRows)
 	} else {
+		errSummary := strings.Join(parseErrors, "; ")
+		database.UpdateSourceMetadata(n.db, sourceName, yearsRange, 0, "partial", 
+			fmt.Sprintf("Could not parse files: %s", errSummary))
+		
 		fmt.Println()
-		fmt.Println("    ℹ NCES Note: Files are in old Excel 97-2003 (.xls) format")
-		fmt.Println("    ℹ Automatic parsing not fully supported for this format")
-		fmt.Println("    ℹ Adding estimated graduation and enrollment data from NCES Digest summaries...")
-		
-		// Add estimated data based on NCES Digest reports
-		// Historical graduation rates and enrollment rates from NCES Digest
-		estimatedRows := 0
-		
-		// Graduation rates (4-year cohort rate, nationwide)
-		// Source: NCES Digest Table 219.46, historical compilations
-		graduationData := map[int]float64{
-			// Historical data from NCES
-			1870: 2.0, 1880: 2.5, 1890: 3.5, 1900: 6.4, 1910: 8.8,
-			1920: 16.8, 1930: 29.0, 1940: 50.8, 1950: 59.0, 1960: 69.5,
-			1970: 76.9, 1980: 71.4, 1990: 73.7, 2000: 69.8, 2005: 74.7,
-			2010: 79.0, 2011: 79.0, 2012: 80.0, 2013: 81.4, 2014: 82.3,
-			2015: 83.2, 2016: 84.1, 2017: 84.6, 2018: 85.3,
-			2019: 86.0, 2020: 86.5, 2021: 87.0, 2022: 87.0,
-		}
-		
-		for year := startYear; year <= endYear; year++ {
-			if rate, ok := graduationData[year]; ok {
-				_, err := n.db.Exec(`
-					INSERT INTO graduation_rates (year, rate, source, state, cohort_year)
-					VALUES (?, ?, ?, ?, ?)
-					ON CONFLICT(year, cohort_year, state, demographics, source) DO UPDATE SET
-						rate = excluded.rate
-				`, year, rate, "nces_digest_estimated", "US", year-4)
-				
-				if err == nil {
-					estimatedRows++
-				}
-			}
-		}
-		
-		// Enrollment rates (3-4 year olds in pre-K, 5-17 in K-12)
-		// Source: NCES Digest Table 103.20, historical compilations
-		enrollmentData := map[int]map[string]float64{
-			// Historical K-12 enrollment (ages 5-17)
-			1870: {"5-17": 50.0}, 1880: {"5-17": 57.8}, 1890: {"5-17": 54.3},
-			1900: {"5-17": 50.5}, 1910: {"5-17": 59.2}, 1920: {"5-17": 64.3},
-			1930: {"5-17": 69.9}, 1940: {"5-17": 74.8}, 1950: {"5-17": 79.3},
-			1960: {"5-17": 82.2}, 1970: {"5-17": 87.4}, 1980: {"5-17": 89.0},
-			1990: {"5-17": 92.5}, 2000: {"5-17": 94.0}, 2005: {"5-17": 95.0},
-			2010: {"3-4": 48.0, "5-17": 95.5},
-			2011: {"3-4": 49.0, "5-17": 95.5},
-			2012: {"3-4": 50.0, "5-17": 95.0},
-			2013: {"3-4": 51.0, "5-17": 95.0},
-			2014: {"3-4": 52.0, "5-17": 95.0},
-			2015: {"3-4": 53.0, "5-17": 95.0},
-			2016: {"3-4": 54.0, "5-17": 95.0},
-			2017: {"3-4": 54.0, "5-17": 95.5},
-			2018: {"3-4": 55.0, "5-17": 95.5},
-			2019: {"3-4": 54.0, "5-17": 96.0},
-			2020: {"3-4": 40.0, "5-17": 91.0}, // COVID impact
-			2021: {"3-4": 48.0, "5-17": 93.0}, // COVID recovery
-			2022: {"3-4": 52.0, "5-17": 94.5},
-		}
-		
-		for year := startYear; year <= endYear; year++ {
-			if rates, ok := enrollmentData[year]; ok {
-				for ageGroup, rate := range rates {
-					level := "elementary" // 5-17 maps to elementary+secondary
-					if ageGroup == "3-4" {
-						level = "elementary" // Pre-K
-					}
-					
-					_, err := n.db.Exec(`
-						INSERT INTO enrollment_rates (year, age_group, enrollment_rate, source, level, state)
-						VALUES (?, ?, ?, ?, ?, ?)
-						ON CONFLICT(year, age_group, level, state, demographics, source) DO UPDATE SET
-							enrollment_rate = excluded.enrollment_rate
-					`, year, ageGroup, rate, "nces_digest_estimated", level, "US")
-					
-					if err == nil {
-						estimatedRows++
-					}
-				}
-			}
-		}
-		
-		totalRows = estimatedRows
-		database.UpdateSourceMetadata(n.db, sourceName, yearsRange, totalRows, "success", 
-			fmt.Sprintf("Added %d rows of estimated data from NCES Digest summaries", estimatedRows))
-		fmt.Printf("    ✓ Added %d rows of estimated graduation and enrollment data\n", estimatedRows)
+		fmt.Println("    ⚠ NCES Note: Files are in old Excel 97-2003 (.xls) format")
+		fmt.Println("    ⚠ Automatic parsing not supported for this format")
 		fmt.Println("    ℹ Files have been downloaded to:", filepath.Dir(n.getDownloadPath("")))
-		fmt.Println("    ℹ You can manually extract more detailed data or convert files to .xlsx format")
+		fmt.Println("    ℹ Recommended: Manually convert to .xlsx or use NCES online data tools")
+		fmt.Println("    ℹ Visit: https://nces.ed.gov/programs/digest/")
+		fmt.Printf("  ⚠ NCES download incomplete: 0 rows parsed\n")
 	}
 	
-	fmt.Printf("  ✓ NCES download complete: %d rows\n", totalRows)
 	return nil
 }
 

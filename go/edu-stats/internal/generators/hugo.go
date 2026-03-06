@@ -116,7 +116,6 @@ func (h *HugoGenerator) generateLiteracyData() (StatData, error) {
 	rows, err := h.db.Query(`
 		SELECT year, AVG(rate) as avg_rate
 		FROM literacy_rates
-		WHERE age_group = 'adult_15plus'
 		GROUP BY year
 		ORDER BY year
 	`)
@@ -127,8 +126,8 @@ func (h *HugoGenerator) generateLiteracyData() (StatData, error) {
 
 	var data StatData
 	data.Name = "Literacy Rates"
-	data.Description = "Adult literacy rates (15+)"
-	data.Source = "World Bank / UNESCO"
+	data.Description = "Adult literacy and high school completion rates"
+	data.Source = "NCES Digest"
 
 	for rows.Next() {
 		var dp DataPoint
@@ -174,6 +173,7 @@ func (h *HugoGenerator) generateGraduationData() (StatData, error) {
 	rows, err := h.db.Query(`
 		SELECT year, AVG(rate) as avg_rate
 		FROM graduation_rates
+		WHERE state = 'US' OR state IS NULL
 		GROUP BY year
 		ORDER BY year
 	`)
@@ -184,8 +184,8 @@ func (h *HugoGenerator) generateGraduationData() (StatData, error) {
 
 	var data StatData
 	data.Name = "High School Graduation Rates"
-	data.Description = "Percentage graduating from high school"
-	data.Source = "NCES"
+	data.Description = "4-year adjusted cohort graduation rate (ACGR)"
+	data.Source = "NCES Digest"
 
 	for rows.Next() {
 		var dp DataPoint
@@ -202,6 +202,7 @@ func (h *HugoGenerator) generateEnrollmentData() (StatData, error) {
 	rows, err := h.db.Query(`
 		SELECT year, AVG(enrollment_rate) as avg_rate
 		FROM enrollment_rates
+		WHERE state = 'US' OR state IS NULL
 		GROUP BY year
 		ORDER BY year
 	`)
@@ -212,8 +213,8 @@ func (h *HugoGenerator) generateEnrollmentData() (StatData, error) {
 
 	var data StatData
 	data.Name = "Enrollment Rates"
-	data.Description = "School enrollment rates by level"
-	data.Source = "NCES"
+	data.Description = "School enrollment rates (averaged across age groups)"
+	data.Source = "NCES Digest"
 
 	for rows.Next() {
 		var dp DataPoint
@@ -284,16 +285,77 @@ func (h *HugoGenerator) generateEarlyChildhoodData() (StatData, error) {
 }
 
 func (h *HugoGenerator) generateStatsIndex(outputDir string) error {
-	index := map[string]string{
-		"literacy":        "Literacy Rates",
-		"attainment":      "Educational Attainment",
-		"graduation":      "High School Graduation Rates",
-		"enrollment":      "Enrollment Rates",
-		"proficiency":     "Test Proficiency (NAEP)",
-		"early_childhood": "Early Childhood Metrics",
+	type StatIndexEntry struct {
+		Name        string `json:"name"`
+		Description string `json:"description"`
+		Filename    string `json:"filename"`
+		Available   bool   `json:"available"`
+		YearMin     int    `json:"yearMin,omitempty"`
+		YearMax     int    `json:"yearMax,omitempty"`
+		DataPoints  int    `json:"dataPoints,omitempty"`
 	}
 
-	outputPath := filepath.Join(outputDir, "stats_index.json")
+	type IndexData struct {
+		Generated string                    `json:"generated"`
+		Stats     map[string]StatIndexEntry `json:"stats"`
+	}
+
+	index := IndexData{
+		Generated: fmt.Sprintf("%d-%02d-%02d", 2026, 2, 3), // Current date
+		Stats:     make(map[string]StatIndexEntry),
+	}
+
+	// Check each stat file to see if it exists and has data
+	statsToCheck := []struct {
+		key         string
+		name        string
+		description string
+		filename    string
+	}{
+		{"literacy", "Literacy Rates", "Adult literacy and high school completion rates", "literacy.json"},
+		{"attainment", "Educational Attainment", "Educational attainment levels by degree", "attainment.json"},
+		{"graduation", "Graduation Rates", "High school graduation rates", "graduation.json"},
+		{"enrollment", "Enrollment Rates", "School enrollment rates by age group", "enrollment.json"},
+		{"proficiency", "Test Proficiency", "NAEP test proficiency scores", "proficiency.json"},
+		{"early_childhood", "Early Childhood", "Early childhood readiness metrics", "early_childhood.json"},
+	}
+
+	for _, stat := range statsToCheck {
+		entry := StatIndexEntry{
+			Name:        stat.name,
+			Description: stat.description,
+			Filename:    stat.filename,
+			Available:   false,
+		}
+
+		// Check if file exists and read its metadata
+		filePath := filepath.Join(outputDir, stat.filename)
+		if fileData, err := os.ReadFile(filePath); err == nil {
+			var statData StatData
+			if err := json.Unmarshal(fileData, &statData); err == nil && len(statData.Years) > 0 {
+				entry.Available = true
+				entry.DataPoints = len(statData.Years)
+				
+				// Calculate year range
+				minYear := statData.Years[0].Year
+				maxYear := statData.Years[0].Year
+				for _, dp := range statData.Years {
+					if dp.Year < minYear {
+						minYear = dp.Year
+					}
+					if dp.Year > maxYear {
+						maxYear = dp.Year
+					}
+				}
+				entry.YearMin = minYear
+				entry.YearMax = maxYear
+			}
+		}
+
+		index.Stats[stat.key] = entry
+	}
+
+	outputPath := filepath.Join(outputDir, "index.json")
 	file, err := os.Create(outputPath)
 	if err != nil {
 		return err
@@ -302,5 +364,10 @@ func (h *HugoGenerator) generateStatsIndex(outputDir string) error {
 
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
-	return encoder.Encode(index)
+	if err := encoder.Encode(index); err != nil {
+		return err
+	}
+
+	fmt.Printf("    ✓ Generated index.json (%d stats)\n", len(index.Stats))
+	return nil
 }
