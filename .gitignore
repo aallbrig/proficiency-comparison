@@ -31,4 +31,7 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
-edu-stats
+
+# Compiled CLI binary
+/edu-stats
+/go/edu-stats/edu-stats

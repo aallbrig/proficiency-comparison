@@ -63,8 +63,8 @@
                     </div>
                     <div class="col-md-6">
                         <h4>Early Childhood Metrics</h4>
-                        <p><small>NCES ECLS (1998-present)</small></p>
-                        <p>Early literacy, school readiness, and developmental indicators.</p>
+                        <p><small>NCES ECLS (restricted access)</small></p>
+                        <p>Early literacy, school readiness, and developmental indicators. Public microdata requires a restricted-use license from NCES.</p>
                     </div>
                 </div>
             </section>
@@ -73,19 +73,31 @@
                 <h2>Methodology</h2>
                 <h4>Cohort Mapping</h4>
                 <p>
-                    Birth years are mapped to age-appropriate data:
+                    Each statistic is measured at the life stage when it is most meaningful for that birth cohort:
                 </p>
-                <ul>
-                    <li>Adult literacy measured at age 15+</li>
-                    <li>High school graduation rates at age 18</li>
-                    <li>Educational attainment at age 25+</li>
-                    <li>Grade-level proficiency tests at ages 9, 13, and 17</li>
-                </ul>
+                <table class="table table-sm table-bordered">
+                    <thead class="table-light">
+                        <tr><th>Statistic</th><th>Life Stage</th><th>Offset from Birth Year</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>NAEP Reading Score (Grade 8)</td><td>Age ~14</td><td>+14 years</td></tr>
+                        <tr><td>High School Graduation Rate</td><td>Age ~18</td><td>+18 years</td></tr>
+                        <tr><td>Literacy Rate</td><td>Young adult (15+)</td><td>+20 years</td></tr>
+                        <tr><td>Bachelor's Degree Attainment</td><td>Young adult (25+)</td><td>+26 years</td></tr>
+                        <tr><td>School Enrollment</td><td>K-12 midpoint (~age 10)</td><td>+10 years</td></tr>
+                        <tr><td>Early Childhood Readiness</td><td>Kindergarten (~age 5)</td><td>+5 years</td></tr>
+                    </tbody>
+                </table>
+                <p>
+                    For example, someone born in 1970 (Generation X) had their NAEP Grade 8 reading measured in 1984,
+                    graduated high school around 1988, and would show bachelor's degree attainment data from ~1996.
+                </p>
                 
                 <h4>Handling Recent Cohorts</h4>
                 <p>
-                    For recent birth years (e.g., 2016), we use proxy data from current grade-level 
-                    assessments to provide estimates of ongoing educational experiences.
+                    For very recent birth years, some life-stage data may not exist yet — those cells 
+                    will show <strong>N/A</strong>. For sparse datasets like NAEP (measured every 2–4 years), 
+                    we find the nearest available data point within an appropriate search window.
                 </p>
             </section>
 
