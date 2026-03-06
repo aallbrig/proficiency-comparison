@@ -33,8 +33,10 @@ func (c *CensusDownloader) Download(startYear, endYear int, dryRun bool) error {
 	totalRows := 0
 	
 	// Try ACS 1-year estimates for recent years (2010-present)
-	for year := max(2010, startYear); year <= min(endYear, 2023); year++ {
+	for year := max(2010, startYear); year <= min(endYear, 2024); year++ {
 		// ACS API format: /data/{year}/acs/acs1
+		// B15003_022E = Bachelor's degree count
+		// B15003_001E = Total population 25 years and over
 		url := fmt.Sprintf("https://api.census.gov/data/%d/acs/acs1?get=NAME,B15003_022E,B15003_001E&for=us:*", year)
 		
 		resp, err := http.Get(url)
@@ -113,50 +115,18 @@ func (c *CensusDownloader) Download(startYear, endYear int, dryRun bool) error {
 
 	yearsRange := fmt.Sprintf("%d-%d", startYear, endYear)
 	
-	// Add historical Census data from published tables (1940-2009)
-	// Source: Census Historical Tables on Educational Attainment
-	fmt.Printf("    Adding historical educational attainment data (startYear=%d, endYear=%d)...\n", startYear, endYear)
-	
-	historicalData := map[int]float64{
-		1940: 4.6, 1950: 6.2, 1960: 7.7, 1970: 10.7, 1975: 13.9,
-		1980: 16.2, 1985: 19.4, 1990: 21.3, 1995: 23.0, 2000: 25.6,
-		2005: 27.7, 2006: 28.0, 2007: 28.7, 2008: 29.4, 2009: 29.5,
-	}
-	
-	historicalAdded := 0
-	for year := startYear; year < 2010; year++ {
-		if percent, ok := historicalData[year]; ok {
-			_, err := c.db.Exec(`
-				INSERT INTO educational_attainment (year, age_group, education_level, percentage, source)
-				VALUES (?, ?, ?, ?, ?)
-				ON CONFLICT(year, age_group, education_level, gender, race, source) DO UPDATE SET
-					percentage = excluded.percentage
-			`, year, "25plus", "bachelors_plus", percent, sourceName+"_historical")
-			
-			if err != nil {
-				fmt.Printf("    ⚠ Failed to insert historical year %d: %v\n", year, err)
-			} else {
-				totalRows++
-				historicalAdded++
-				fmt.Printf("    ✓ Added historical year %d (%.1f%%)\n", year, percent)
-			}
-		}
-	}
-	
-	if historicalAdded > 0 {
-		fmt.Printf("    ✓ Added %d historical data points\n", historicalAdded)
-	}
-	
 	if totalRows > 0 {
 		database.UpdateSourceMetadata(c.db, sourceName, yearsRange, totalRows, "success", 
-			"Includes historical data from Census tables")
+			fmt.Sprintf("Downloaded %d years from Census ACS API (2010+)", totalRows))
 	} else {
 		database.UpdateSourceMetadata(c.db, sourceName, yearsRange, 0, "partial", 
-			"No data available for requested range")
+			"No data available for requested range (Census ACS data available 2010+)")
 	}
 	
-	fmt.Printf("  ✓ Census download complete: %d rows (1940-present)\n", totalRows)
-	fmt.Println("    ℹ Historical data sourced from Census Bureau published tables")
+	fmt.Printf("  ✓ Census download complete: %d rows\n", totalRows)
+	fmt.Println("    ℹ Census ACS 1-year estimates available 2010-present")
+	fmt.Println("    ℹ For historical data (pre-2010), use Census Historical Tables")
+	fmt.Println("    ℹ Visit: https://www.census.gov/data/tables/time-series/demo/educational-attainment/")
 	
 	return nil
 }

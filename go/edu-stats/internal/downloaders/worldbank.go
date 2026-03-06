@@ -74,14 +74,14 @@ func (w *WorldBankDownloader) Download(startYear, endYear int, dryRun bool) erro
 		}
 
 		if len(response) < 2 {
-			fmt.Printf("    ⚠ No data returned for %s\n", indicator.code)
+			fmt.Printf("    ℹ No data returned for %s\n", indicator.code)
 			continue
 		}
 
 		// Extract data array
 		dataArray, ok := response[1].([]interface{})
 		if !ok || len(dataArray) == 0 {
-			fmt.Printf("    ⚠ Empty data array for %s\n", indicator.code)
+			fmt.Printf("    ℹ Empty data array for %s\n", indicator.code)
 			continue
 		}
 
@@ -129,81 +129,16 @@ func (w *WorldBankDownloader) Download(startYear, endYear int, dryRun bool) erro
 	}
 
 	yearsRange := fmt.Sprintf("%d-%d", startYear, endYear)
-	if totalRows > 0 {
+	
+	// World Bank does not track US literacy rates (US is developed country)
+	if totalRows == 0 {
+		fmt.Println("    ℹ World Bank does not collect literacy data for USA")
+		fmt.Println("    ℹ Use NCES data sources for US literacy statistics")
+		database.UpdateSourceMetadata(w.db, sourceName, yearsRange, 0, "success", 
+			"No US data available from World Bank (US is not surveyed for literacy)")
+	} else {
 		database.UpdateSourceMetadata(w.db, sourceName, yearsRange, totalRows, "success", "")
 		fmt.Printf("  ✓ World Bank download complete: %d total rows\n", totalRows)
-	} else {
-		// World Bank doesn't track US literacy, but we can add estimated data from NCES
-		// US adult literacy is well-documented at approximately 79% (prose literacy at Level 3+)
-		// Source: NCES PIAAC (Program for the International Assessment of Adult Competencies)
-		fmt.Println("  ℹ World Bank download: No US data available")
-		fmt.Println("    Note: World Bank does not collect literacy data for USA")
-		fmt.Println("    Adding US literacy data from NCES historical and PIAAC reports...")
-		
-		// Historical US literacy data from NCES
-		// Source: 120 Years of American Education (NCES)
-		// NOTE: Basic literacy (ability to read/write) has been near-universal since 1980
-		historicalLiteracy := map[int]float64{
-			1870: 80.0, 1880: 83.0, 1890: 86.7, 1900: 89.3, 1910: 92.3,
-			1920: 94.0, 1930: 95.7, 1940: 97.1, 1950: 97.8, 1960: 97.9,
-			1970: 98.5, 1980: 99.0, 1990: 99.0, 2000: 99.0,
-		}
-		
-		// Modern period: Use consistent basic literacy metric
-		// Basic literacy has remained at 99% for those able to read at any level
-		// Note: Functional literacy (PIAAC Level 3+) is lower (~79%) but that's
-		// a different, higher standard not comparable to historical data
-		modernLiteracy := map[int]float64{
-			2001: 99.0, 2002: 99.0, 2003: 99.0, 2004: 99.0, 2005: 99.0,
-			2006: 99.0, 2007: 99.0, 2008: 99.0, 2009: 99.0, 2010: 99.0,
-			2011: 99.0, 2012: 99.0, 2013: 99.0, 2014: 99.0, 2015: 99.0,
-			2016: 99.0, 2017: 99.0, 2018: 99.0, 2019: 99.0, 2020: 99.0, 
-			2021: 99.0, 2022: 99.0, 2023: 99.0, 2024: 99.0, 2025: 99.0,
-		}
-		
-		// Insert literacy data for years where we have real data
-		estimatedRows := 0
-		for year, rate := range historicalLiteracy {
-			if year < startYear || year > endYear {
-				continue // Outside requested range
-			}
-			
-			// Adult literacy (ages 15+)
-			_, err := w.db.Exec(`
-				INSERT INTO literacy_rates (year, age_group, rate, source, gender)
-				VALUES (?, ?, ?, ?, ?)
-				ON CONFLICT(year, age_group, gender, source) DO UPDATE SET
-					rate = excluded.rate
-			`, year, "adult_15plus", rate, "nces_historical", "all")
-			
-			if err == nil {
-				estimatedRows++
-			}
-		}
-		
-		// Add modern data points if in range
-		for year, rate := range modernLiteracy {
-			if year < startYear || year > endYear {
-				continue
-			}
-			
-			// Adult literacy (ages 15+)
-			_, err := w.db.Exec(`
-				INSERT INTO literacy_rates (year, age_group, rate, source, gender)
-				VALUES (?, ?, ?, ?, ?)
-				ON CONFLICT(year, age_group, gender, source) DO UPDATE SET
-					rate = excluded.rate
-			`, year, "adult_15plus", rate, "nces_historical", "all")
-			
-			if err == nil {
-				estimatedRows++
-			}
-		}
-		
-		totalRows = estimatedRows
-		database.UpdateSourceMetadata(w.db, sourceName, yearsRange, totalRows, "success", 
-			"Using US literacy from NCES historical data (1870-2000) and consistent basic literacy (99% since 1980)")
-		fmt.Printf("  ✓ Added %d rows of US literacy data (historical data points only)\n", totalRows)
 	}
 	
 	return nil

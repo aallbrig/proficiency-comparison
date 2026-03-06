@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -9,11 +10,19 @@ import (
 	"github.com/aallbrig/proficiency-comparison/internal/utils"
 )
 
+var (
+	verbose bool
+)
+
 var statusCmd = &cobra.Command{
 	Use:   "status",
 	Short: "Show database and data source status",
 	Long:  `Display database status, last download times, row counts, and data source connectivity.`,
 	RunE:  runStatus,
+}
+
+func init() {
+	statusCmd.Flags().BoolVarP(&verbose, "verbose", "v", false, "Show verbose output including reset history")
 }
 
 func runStatus(cmd *cobra.Command, args []string) error {
@@ -107,6 +116,65 @@ func runStatus(cmd *cobra.Command, args []string) error {
 			fmt.Printf("  ❌ %s: unreachable\n", source.name)
 		}
 	}
+	fmt.Println()
+
+	// Show reset history (if verbose flag is set)
+	if verbose {
+		resetHistory, err := getResetHistory(db)
+		if err == nil && len(resetHistory) > 0 {
+			fmt.Println("🔄 Recent Reset Operations:")
+			for _, reset := range resetHistory {
+				fmt.Printf("  • %s: Years %d-%d (%d rows deleted, %.2fs)\n",
+					reset.Timestamp.Format("2006-01-02 15:04:05"),
+					reset.StartYear, reset.EndYear, reset.RowsDeleted, reset.ExecutionTime)
+				if reset.DeletionSummary != "" {
+					fmt.Printf("    Summary: %s\n", reset.DeletionSummary)
+				}
+			}
+			fmt.Println()
+		}
+	}
 
 	return nil
+}
+
+type ResetRecord struct {
+	Timestamp       time.Time
+	StartYear       int
+	EndYear         int
+	RowsDeleted     int
+	ExecutionTime   float64
+	DeletionSummary string
+}
+
+func getResetHistory(db *sql.DB) ([]ResetRecord, error) {
+	// Check if reset_audit table exists
+	var tableExists int
+	err := db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='reset_audit'").Scan(&tableExists)
+	if err != nil || tableExists == 0 {
+		return nil, nil
+	}
+
+	rows, err := db.Query(`
+		SELECT reset_timestamp, start_year, end_year, rows_deleted, execution_time_seconds, deletion_summary
+		FROM reset_audit
+		ORDER BY reset_timestamp DESC
+		LIMIT 5
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var records []ResetRecord
+	for rows.Next() {
+		var r ResetRecord
+		err := rows.Scan(&r.Timestamp, &r.StartYear, &r.EndYear, &r.RowsDeleted, &r.ExecutionTime, &r.DeletionSummary)
+		if err != nil {
+			continue
+		}
+		records = append(records, r)
+	}
+
+	return records, nil
 }

@@ -1,6 +1,6 @@
 module.exports = {
   testEnvironment: 'jsdom',
-  testMatch: ['**/__tests__/**/*.js', '**/?(*.)+(spec|test).js'],
+  testMatch: ['**/static/js/**/__tests__/**/*.js', '**/static/js/**/?(*.)+(spec|test).js'],
   collectCoverageFrom: [
     'static/js/**/*.js',
     '!static/js/**/*.test.js'

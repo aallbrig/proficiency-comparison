@@ -67,27 +67,6 @@ main {
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
 }
 
-.stat-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.stat-row:last-child {
-    border-bottom: none;
-}
-
-.stat-label {
-    font-weight: 500;
-    color: #495057;
-}
-
-.stat-value {
-    font-weight: 600;
-    color: #212529;
-}
-
 /* Timeline Styles */
 #timelineWrapper {
     min-height: 150px;
@@ -156,13 +135,12 @@ main {
     z-index: 1000;
 }
 
-.timeline-marker.red {
-    background-color: #dc3545;
-}
-
-.timeline-marker.blue {
-    background-color: #0d6efd;
-}
+.timeline-marker.red    { background-color: #dc3545; }
+.timeline-marker.blue   { background-color: #0d6efd; }
+.timeline-marker.green  { background-color: #198754; }
+.timeline-marker.orange { background-color: #fd7e14; }
+.timeline-marker.purple { background-color: #6f42c1; }
+.timeline-marker.teal   { background-color: #0dcaf0; color: #000; }
 
 .table th {
     background-color: #f8f9fa;
@@ -187,8 +165,96 @@ footer {
     background-color: #f8f9fa;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
+/* Generation bands on timeline */
+.generation-band {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    opacity: 0.18;
+    pointer-events: none;
+    border-right: 1px dashed rgba(0,0,0,0.25);
+}
+
+.generation-band-label {
+    position: absolute;
+    top: 5px;
+    left: 4px;
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: rgba(0,0,0,0.55);
+    white-space: nowrap;
+    letter-spacing: 0.02em;
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+.generation-band-silent      { background-color: #6c757d; }
+.generation-band-baby-boomer { background-color: #ff6b6b; }
+.generation-band-x           { background-color: #4ecdc4; }
+.generation-band-millennial  { background-color: #45b7d1; }
+.generation-band-z           { background-color: #96ceb4; }
+.generation-band-alpha       { background-color: #dda15e; }
+
+/* Stat rows with cohort context */
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid #f0f0f0;
+    gap: 0.5rem;
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+.stat-label-group {
+    flex: 1;
+    min-width: 0;
+}
+
+.stat-label {
+    font-weight: 500;
+    color: #495057;
+    display: block;
+    font-size: 0.9rem;
+}
+
+.stat-cohort-label {
+    display: block;
+    font-size: 0.72rem;
+    color: #6c757d;
+    margin-top: 1px;
+}
+
+.stat-value-group {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.stat-value {
+    font-weight: 700;
+    color: #212529;
+    display: block;
+    font-size: 0.95rem;
+}
+
+.stat-measured-year {
+    display: block;
+    font-size: 0.7rem;
+    color: #6c757d;
+}
+
+/* Quick comparison preset buttons */
+.preset-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    align-items: center;
+}
+
+
     #qrcode {
         margin-top: 20px;
     }

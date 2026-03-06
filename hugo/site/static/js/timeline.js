@@ -7,19 +7,74 @@ let availableStats = []; // Stats with actual data
 let dragState = null; // Current drag operation
 
 // Constants
-// Timeline configuration - spans full historical range
-const MIN_YEAR = 1870;  // Start of historical education data
-const MAX_YEAR = 2025;  // Current year + projection
-const MARKER_COLORS = ['red', 'blue'];
+// Timeline configuration - dynamically determined from available data
+let MIN_YEAR = 1928;  // Default fallback - Silent Generation
+let MAX_YEAR = 2024;  // Default fallback
+const MARKER_COLORS = ['red', 'blue', 'green', 'orange', 'purple', 'teal'];
 
-// Stat metadata
+// Generation definitions used for timeline bands and labels
+const GENERATIONS = [
+    { name: 'Silent', short: 'Silent', start: 1928, end: 1945, class: 'silent' },
+    { name: 'Baby Boomer', short: 'Boomer', start: 1946, end: 1964, class: 'baby-boomer' },
+    { name: 'Generation X', short: 'Gen X', start: 1965, end: 1980, class: 'x' },
+    { name: 'Millennial', short: 'Millennial', start: 1981, end: 1996, class: 'millennial' },
+    { name: 'Generation Z', short: 'Gen Z', start: 1997, end: 2012, class: 'z' },
+    { name: 'Generation Alpha', short: 'Gen Alpha', start: 2013, end: 2030, class: 'alpha' },
+];
+
+// Stat metadata with cohort-based life-stage mapping.
+// cohortOffset: years after birth when this stat is measured
+// cohortLabel: human-readable life stage description
+// searchWindow: ±years to search for nearest data point (larger for sparse datasets)
 const statMetadata = {
-    literacy: { name: 'Literacy Rate', description: 'Adult literacy rates (15+)', unit: '%' },
-    attainment: { name: 'Bachelor\'s+', description: 'Percentage with bachelor\'s degree or higher (25+)', unit: '%' },
-    graduation: { name: 'HS Graduation', description: 'High school graduation rate', unit: '%' },
-    enrollment: { name: 'Enrollment', description: 'School enrollment rates', unit: '%' },
-    proficiency: { name: 'Test Proficiency', description: 'NAEP Reading scores (Grade 8)', unit: 'pts' },
-    early_childhood: { name: 'Early Childhood', description: 'Early literacy and readiness', unit: 'score' }
+    literacy: {
+        name: 'Literacy Rate',
+        description: 'Adult literacy / HS completion rate (15+)',
+        unit: '%',
+        cohortOffset: 20,
+        cohortLabel: 'at age ~20',
+        searchWindow: 6,
+    },
+    attainment: {
+        name: "Bachelor's+",
+        description: "Percentage with bachelor's degree or higher (age 25+)",
+        unit: '%',
+        cohortOffset: 26,
+        cohortLabel: 'at age ~26',
+        searchWindow: 3,
+    },
+    graduation: {
+        name: 'HS Graduation',
+        description: 'High school graduation rate (4-year ACGR)',
+        unit: '%',
+        cohortOffset: 18,
+        cohortLabel: 'at age ~18',
+        searchWindow: 2,
+    },
+    enrollment: {
+        name: 'Enrollment',
+        description: 'School enrollment rate',
+        unit: '%',
+        cohortOffset: 10,
+        cohortLabel: 'at age ~10',
+        searchWindow: 2,
+    },
+    proficiency: {
+        name: 'NAEP Reading',
+        description: 'NAEP Reading score (Grade 8, age ~14)',
+        unit: ' pts',
+        cohortOffset: 14,
+        cohortLabel: 'at age ~14 (Gr.8)',
+        searchWindow: 4,
+    },
+    early_childhood: {
+        name: 'Early Childhood',
+        description: 'Early literacy and kindergarten readiness (age ~5)',
+        unit: '',
+        cohortOffset: 5,
+        cohortLabel: 'at age ~5',
+        searchWindow: 2,
+    },
 };
 
 // Initialize on page load
@@ -36,35 +91,85 @@ async function initializeApp() {
     updateNoTablesMessage();
 }
 
+// Preset generation comparisons
+const PRESETS = {
+    boomers_vs_millennials: { label: 'Boomers vs Millennials', years: [1955, 1985] },
+    all_generations:        { label: 'All Generations', years: [1955, 1970, 1985, 2000, 2015] },
+    genx_vs_genz:           { label: 'Gen X vs Gen Z', years: [1970, 2000] },
+    three_way:              { label: 'Three Generations', years: [1960, 1982, 2000] },
+};
+
+function loadPreset(presetKey) {
+    const preset = PRESETS[presetKey];
+    if (!preset) return;
+    markers = [];
+    preset.years.forEach(year => {
+        if (year >= MIN_YEAR && year <= MAX_YEAR) {
+            markers.push({ year, id: generateId() });
+        }
+    });
+    renderTimeline();
+    renderComparisonTables();
+    updateNoTablesMessage();
+    updateURL();
+}
+
+function clearAllMarkers() {
+    markers = [];
+    renderTimeline();
+    renderComparisonTables();
+    updateNoTablesMessage();
+    updateURL();
+}
+
+// Expose presets to global scope for inline event handlers
+window.loadPreset = loadPreset;
+window.clearAllMarkers = clearAllMarkers;
+
 // Load and detect available stats
 async function loadAvailableStats() {
-    const statsToTry = ['literacy', 'attainment', 'proficiency', 'graduation', 'enrollment', 'early_childhood'];
-    
-    for (const stat of statsToTry) {
-        try {
-            const response = await fetch(`/data/${stat}.json`);
-            if (response.ok) {
-                const data = await response.json();
-                if (data && data.data && data.data.length > 0) {
-                    statData[stat] = data;
-                    availableStats.push(stat);
+    try {
+        // Try to load index.json first
+        const response = await fetch('/data/index.json');
+        if (response.ok) {
+            const indexData = await response.json();
+            
+            for (const [statName, statInfo] of Object.entries(indexData.stats || {})) {
+                if (statInfo.available) {
+                    // Load the actual stat data
+                    try {
+                        const statResponse = await fetch(`/data/${statInfo.filename}`);
+                        if (statResponse.ok) {
+                            const data = await statResponse.json();
+                            if (data && data.data && data.data.length > 0) {
+                                statData[statName] = data;
+                                availableStats.push(statName);
+                            }
+                        }
+                    } catch (error) {
+                        console.log(`Stat ${statName} failed to load:`, error);
+                    }
                 }
             }
-        } catch (error) {
-            console.log(`Stat ${stat} not available`);
+            
+            if (availableStats.length === 0) {
+                showNoDataWarning();
+            } else {
+                hideNoDataWarning();
+                selectedStats = selectedStats.filter(s => availableStats.includes(s));
+                if (selectedStats.length === 0) {
+                    selectedStats = [availableStats[0]];
+                }
+            }
+            
+            return;
         }
+    } catch (error) {
+        console.log('Index not available, falling back to individual stat checks');
     }
     
-    if (availableStats.length === 0) {
-        showNoDataWarning();
-    } else {
-        hideNoDataWarning();
-        // Filter selected stats to only available ones
-        selectedStats = selectedStats.filter(s => availableStats.includes(s));
-        if (selectedStats.length === 0) {
-            selectedStats = [availableStats[0]];
-        }
-    }
+    // Fallback: try individual stat files
+    await loadStatsLegacyWay();
 }
 
 // Event listeners setup
@@ -194,13 +299,35 @@ function highlightMarker(id) {
     }
 }
 
-// Render timeline
+// Render timeline with generation bands
 function renderTimeline() {
     const timeline = document.getElementById('timeline');
     const markersContainer = document.getElementById('timelineMarkers');
     const labelsContainer = document.getElementById('timelineLabels');
     
     if (!timeline || !markersContainer || !labelsContainer) return;
+    
+    // Render generation bands inside the track
+    timeline.querySelectorAll('.generation-band').forEach(b => b.remove());
+    GENERATIONS.forEach(gen => {
+        const startPos = Math.max(0, ((gen.start - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100);
+        const endPos = Math.min(100, ((gen.end + 1 - MIN_YEAR) / (MAX_YEAR - MIN_YEAR)) * 100);
+        if (startPos >= 100 || endPos <= 0) return;
+        
+        const band = document.createElement('div');
+        band.className = `generation-band generation-band-${gen.class}`;
+        band.style.left = `${startPos}%`;
+        band.style.width = `${endPos - startPos}%`;
+        band.title = `${gen.name} (${gen.start}–${gen.end})`;
+        
+        if (endPos - startPos > 6) {
+            const lbl = document.createElement('span');
+            lbl.className = 'generation-band-label';
+            lbl.textContent = gen.short;
+            band.appendChild(lbl);
+        }
+        timeline.appendChild(band);
+    });
     
     // Render year labels
     labelsContainer.innerHTML = `
@@ -236,7 +363,7 @@ function renderTimeline() {
     // Update year range display
     const yearRangeEl = document.getElementById('yearRange');
     if (yearRangeEl) {
-        yearRangeEl.textContent = `${MIN_YEAR}-${MAX_YEAR}`;
+        yearRangeEl.textContent = `${MIN_YEAR}–${MAX_YEAR}`;
     }
 }
 
@@ -370,7 +497,8 @@ function renderComparisonTables() {
     });
 }
 
-// Render stats for a specific marker
+// Render stats for a specific marker using cohort-appropriate life-stage offsets.
+// Each stat is mapped to the year when it would have been measured for that birth cohort.
 function renderStatsForMarker(marker) {
     if (selectedStats.length === 0) {
         return '<p class="text-muted small">No statistics selected. Click settings to choose.</p>';
@@ -383,16 +511,38 @@ function renderStatsForMarker(marker) {
         
         if (!data || !metadata) return;
         
-        // Find appropriate data point (simplified cohort mapping)
-        // For adult stats (25+), look at year + 25
-        const targetYear = marker.year + 25;
-        const dataPoint = data.data.find(d => Math.abs(d.year - targetYear) < 3);
-        const value = dataPoint ? `${dataPoint.value.toFixed(1)}${metadata.unit}` : 'N/A';
+        const offset = metadata.cohortOffset || 25;
+        const targetYear = marker.year + offset;
+        const window = metadata.searchWindow || 3;
+        
+        // Find closest data point within the search window
+        let bestPoint = null;
+        let bestDist = Infinity;
+        data.data.forEach(d => {
+            const dist = Math.abs(d.year - targetYear);
+            if (dist <= window && dist < bestDist) {
+                bestDist = dist;
+                bestPoint = d;
+            }
+        });
+        
+        const valueStr = bestPoint
+            ? `${bestPoint.value.toFixed(1)}${metadata.unit}`
+            : 'N/A';
+        const yearStr = bestPoint
+            ? `<span class="stat-measured-year">${bestPoint.year}</span>`
+            : `<span class="stat-measured-year text-muted">~${targetYear}</span>`;
         
         html += `
             <div class="stat-row">
-                <span class="stat-label" title="${metadata.description}">${metadata.name}</span>
-                <span class="stat-value">${value}</span>
+                <div class="stat-label-group">
+                    <span class="stat-label">${metadata.name}</span>
+                    <small class="stat-cohort-label">${metadata.cohortLabel}</small>
+                </div>
+                <div class="stat-value-group">
+                    <span class="stat-value">${valueStr}</span>
+                    ${yearStr}
+                </div>
             </div>
         `;
     });
@@ -517,3 +667,32 @@ function hideNoDataWarning() {
 // Expose functions to global scope for inline event handlers
 window.removeMarker = removeMarker;
 window.highlightMarker = highlightMarker;
+
+async function loadStatsLegacyWay() {
+    const statsToTry = ['literacy', 'attainment', 'proficiency', 'graduation', 'enrollment', 'early_childhood'];
+    
+    for (const stat of statsToTry) {
+        try {
+            const response = await fetch(`/data/${stat}.json`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data && data.data && data.data.length > 0) {
+                    statData[stat] = data;
+                    availableStats.push(stat);
+                }
+            }
+        } catch (error) {
+            console.log(`Stat ${stat} not available`);
+        }
+    }
+    
+    if (availableStats.length === 0) {
+        showNoDataWarning();
+    } else {
+        hideNoDataWarning();
+        selectedStats = selectedStats.filter(s => availableStats.includes(s));
+        if (selectedStats.length === 0) {
+            selectedStats = [availableStats[0]];
+        }
+    }
+}

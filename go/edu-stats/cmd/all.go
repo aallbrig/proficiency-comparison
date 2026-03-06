@@ -30,15 +30,6 @@ func init() {
 	allCmd.Flags().StringVar(&years, "years", "1970-2025", "Year range to download (format: YYYY-YYYY)")
 	allCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Simulate without downloading data")
 	allCmd.Flags().BoolVar(&force, "force", false, "Force re-download all data (ignore resume)")
-	
-	// Add subcommands for individual steps
-	allCmd.AddCommand(checkSchemaCmd)
-	allCmd.AddCommand(downloadWorldBankCmd)
-	allCmd.AddCommand(downloadCensusCmd)
-	allCmd.AddCommand(downloadNCESCmd)
-	allCmd.AddCommand(downloadNAEPCmd)
-	allCmd.AddCommand(downloadECLSCmd)
-	allCmd.AddCommand(generateAssetsCmd)
 }
 
 func parseYears(yearRange string) (int, int, error) {
