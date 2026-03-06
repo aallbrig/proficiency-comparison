@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 type HugoGenerator struct {
@@ -58,8 +59,17 @@ func (h *HugoGenerator) GenerateAll() error {
 	if err := os.MkdirAll(outputDir, 0755); err != nil {
 		return fmt.Errorf("failed to create output directory %s: %w", outputDir, err)
 	}
-	
+
 	fmt.Printf("    Output directory: %s\n", outputDir)
+	return h.generateToDir(outputDir)
+}
+
+// generateToDir writes all stat JSON files and index.json into outputDir.
+// It is separated from GenerateAll to allow testing with a temp directory.
+func (h *HugoGenerator) generateToDir(outputDir string) error {
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return fmt.Errorf("failed to create output directory %s: %w", outputDir, err)
+	}
 
 	generators := []struct {
 		name     string
@@ -301,7 +311,7 @@ func (h *HugoGenerator) generateStatsIndex(outputDir string) error {
 	}
 
 	index := IndexData{
-		Generated: fmt.Sprintf("%d-%02d-%02d", 2026, 2, 3), // Current date
+		Generated: time.Now().Format("2006-01-02"),
 		Stats:     make(map[string]StatIndexEntry),
 	}
 
