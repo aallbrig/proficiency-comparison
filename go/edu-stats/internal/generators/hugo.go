@@ -43,9 +43,16 @@ func (h *HugoGenerator) GenerateAll() error {
 	
 	var outputDir string
 	for _, loc := range hugoOutputLocations {
-		// Check if this looks like it might be the right location
+		// Check if the parent hugo/site/ directory has either hugo.toml or config.toml
 		hugoDir := filepath.Dir(filepath.Dir(loc)) // Go up to hugo/site/
-		if _, err := os.Stat(filepath.Join(hugoDir, "config.toml")); err == nil {
+		hasHugo := false
+		for _, cfgFile := range []string{"hugo.toml", "config.toml", "config.yaml", "hugo.yaml"} {
+			if _, err := os.Stat(filepath.Join(hugoDir, cfgFile)); err == nil {
+				hasHugo = true
+				break
+			}
+		}
+		if hasHugo {
 			outputDir = loc
 			break
 		}
