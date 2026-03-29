@@ -53,3 +53,11 @@ Use these sources for downloading data. Prioritize bulk CSV/Excel/JSON downloads
 - Add tests for all code.
 - Ensure CLI/website handle no-data case (e.g., prompt to run CLI).
 - Use research above for stats comparisons (e.g., align cohorts by life stage).
+
+## Documentation
+
+When creating documentation files:
+
+- Place them in the `docs/` directory or a subdirectory. Typical subdirectories include `docs/design/` and `docs/research/`.
+- Prepend a UTC timestamp to the `.md` filename in the format `YYYYMMDD_HHMMSS_UTC_` so files sort chronologically (e.g., `docs/design/20260329_150800_UTC_architecture_overview.md`).
+
